@@ -1,0 +1,4 @@
+(library
+ (name diskuvbox)
+ (public_name diskuvbox)
+ (libraries bos fmt fpath rresult ))

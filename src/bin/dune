@@ -1,0 +1,4 @@
+(executable
+ (name diskuvbox)
+ (public_name diskuvbox)
+ (libraries diskuvbox))
