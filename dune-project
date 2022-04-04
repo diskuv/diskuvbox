@@ -2,6 +2,7 @@
 
 (name diskuvbox)
 (version 0.1.0)
+(cram enable)
 
 (generate_opam_files true)
 
@@ -17,8 +18,10 @@
  (description
   "A cross-platform basic set of script commands. Available as a single binary (`diskuvbox`, or `diskuvbox.exe` on Windows) and as an OCaml library.")
  (depends
-  (odoc  (and (>= 1.5.3) :with-doc))
+  (odoc     (and (>= 1.5.3) :with-doc))
   ; all of these may go lower; simply has not been tested
-  (ocaml (>= 4.12.1))
-  (bos   (>= 0.2.0))
+  (ocaml    (>= 4.12.1))
+  (bos      (>= 0.2.0))
+  (fmt      (>= 0.8.9))
+  (logs     (>= 0.7.0))
   (cmdliner (= 1.0.4))))

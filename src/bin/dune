@@ -1,4 +1,4 @@
 (executable
- (name diskuvbox)
+ (name main)
  (public_name diskuvbox)
- (libraries diskuvbox))
+ (libraries diskuvbox cmdliner fmt.cli fmt.tty logs.cli logs.fmt))
