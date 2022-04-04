@@ -5,10 +5,18 @@ type box_error = string -> string
     This function can log the error, modify the error message, or raise the
     error immediately. *)
 
-val copy_dir :
+val copy_file :
   ?err:box_error -> src:Fpath.t -> dst:Fpath.t -> unit -> (unit, string) result
-(** [copy_dir ?err ~src ~dst ()] copies the contents of [src] into [dst],
-    creating [dst] and any parent directories as necessary.
+(** [copy_file ?err ~src ~dst ()] copies the file [src] to the file [dst],
+    creating [dst] parent directories as necessary.
     
     Any error is passed to [err] if it is specified. The default [err] is
     the identity function {!Fun.id}. *)
+
+val copy_dir :
+  ?err:box_error -> src:Fpath.t -> dst:Fpath.t -> unit -> (unit, string) result
+(** [copy_dir ?err ~src ~dst ()] copies the contents of [src] into [dst],
+      creating [dst] and any parent directories as necessary.
+      
+      Any error is passed to [err] if it is specified. The default [err] is
+      the identity function {!Fun.id}. *)

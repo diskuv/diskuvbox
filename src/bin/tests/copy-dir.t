@@ -1,6 +1,6 @@
 Show that nothing is in the directory
   $ ls | sort
-  copy-directory.t
+  copy-dir.t
 
 Create a few files in src1/, including a subdirectory
   $ install -d src1
@@ -21,7 +21,7 @@ Create directory src4/ with a symlink
   $ ln -s m src4/n
 
 Use diskuvbox to copy them. The destination directory should be autocreated.
-  $ ../main.exe copy-directory src1 src2 src3 src4 dest
+  $ ../main.exe copy-dir src1 src2 src3 src4 dest
 
 Verify
   $ ls dest | sort

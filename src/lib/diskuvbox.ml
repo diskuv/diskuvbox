@@ -45,6 +45,20 @@ let absolute_path ?(err = Fun.id) fp =
     | Ok pwd -> Result.ok Fpath.(normalize (pwd // fp))
     | Error e -> Error e
 
+let copy_file ?(err = Fun.id) ~src ~dst () =
+  let open Monad_syntax_rresult (struct
+    let box_error = err
+  end) in
+  map_rresult_error_to_string ~err
+    (let* mode = OS.Path.Mode.get src in
+     let* data = OS.File.read src in
+     let parent_dst = Fpath.parent dst in
+     let* created = OS.Dir.create parent_dst in
+     if created then
+       Logs.debug (fun l ->
+           l "[copy_file] Created directory %a" Fpath.pp parent_dst);
+     OS.File.write ~mode dst data)
+
 let copy_dir ?(err = Fun.id) ~src ~dst () =
   let open Monad_syntax_rresult (struct
     let box_error = err
@@ -52,8 +66,8 @@ let copy_dir ?(err = Fun.id) ~src ~dst () =
   let do_copy_dir ~src ~dst =
     let raise_fold_error fpath result =
       Rresult.R.error_msgf
-        "@[[copy_dir] A copy directory operation errored out while \
-         visiting %a.@]@,\
+        "@[[copy_dir] A copy directory operation errored out while visiting \
+         %a.@]@,\
          @[  @[%a@]@]" Fpath.pp fpath
         (Rresult.R.pp
            ~ok:(Fmt.any "<unknown copy_dir problem>")
@@ -93,8 +107,7 @@ let copy_dir ?(err = Fun.id) ~src ~dst () =
               let* created = OS.Dir.create parent_dst in
               if created then
                 Logs.debug (fun l ->
-                    l "[copy_dir] Created directory %a" Fpath.pp
-                      parent_dst);
+                    l "[copy_dir] Created directory %a" Fpath.pp parent_dst);
               let+ () = OS.File.write ~mode dst data in
               ())
     in
@@ -107,8 +120,8 @@ let copy_dir ?(err = Fun.id) ~src ~dst () =
     | Error msg ->
         Rresult.R.error_msg
           (Fmt.str
-             "@[[copy_dir] @[Failed to copy the directory@]@[@ from \
-              %a@]@[@ to %a@]@]@ @[(%a)@]"
+             "@[[copy_dir] @[Failed to copy the directory@]@[@ from %a@]@[@ to \
+              %a@]@]@ @[(%a)@]"
              Fpath.pp src Fpath.pp dst Rresult.R.pp_msg msg)
   in
   map_rresult_error_to_string ~err
