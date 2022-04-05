@@ -33,23 +33,44 @@ end
 
 let dir_dot = Fpath.v "."
 
-(* Windows 260 character limit friendly functions. Any failures with these
-   functions will tell you to look at the 260 character limit as an
-   explanation. *)
+(** {1 Windows 260 character limit friendly functions}
+
+    Any failures with these functions will tell you to look at the 260
+    character limit as an explanation. *)
+
+let windows_max_path = 260
+
+(** [bos_tmp_name_max] is the maximum length of the basename of
+    a temporary file created by the Opam/findlib package ["bos"]. *)
+let bos_tmp_name_max = String.length "bos-837f7c.tmp"
+
+let dirsep_length = String.length Fpath.dir_sep
+
+(** [has_windows_path_problem file] gives true if either the length of [file]
+    exceeds the Windows maximum {!windows_max_path} or if a temporary file
+    created by the Opam/findlib package ["bos"] in the directory of [file]
+    would exceed the Windows maximum {!windows_max_path} *)
+let has_windows_path_problem file =
+  Sys.win32
+  && (String.length (Fpath.to_string file) >= windows_max_path
+     || String.length (Fpath.to_string (Fpath.parent file))
+        + dirsep_length + bos_tmp_name_max
+        >= windows_max_path)
 
 let write ?mode file content =
   match OS.File.write ?mode file content with
   | Ok v -> Ok v
-  | Error m when Sys.win32 && String.length (Fpath.to_string file) >= 260 ->
+  | Error m when has_windows_path_problem file ->
       Rresult.R.(
         error_msg
           (Fmt.str
              "We recommend that you rename your directories to be smaller \
               because there was a failure writing to the pathname %a. It is \
-              likely caused by that pathname exceeding the default Windows 260 \
-              character pathname limit. It may also be what the system \
-              reported: %a."
-             Fpath.pp file pp_msg m))
+              likely caused by that pathname (or a temporary filename like \
+              bos-837f7c.tmp in the same directory) exceeding the default \
+              Windows %d character pathname limit. It may also be what the \
+              system reported: %a."
+             Fpath.pp file windows_max_path pp_msg m))
   | Error msg -> Error msg
 
 (* Public Functions *)
