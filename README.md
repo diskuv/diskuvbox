@@ -12,6 +12,11 @@ either way the "cp" tooling will be invoked.
 The "basic" set of commands was meant to provide the same amount of functionality
 as [cmake -E](https://cmake.org/cmake/help/latest/manual/cmake.1.html#run-a-command-line-tool).
 
+On Windows, any failing command will provide an error message if the paths are
+over the default 260 character pathname limit.
+
 ## Script commands
 
-### diskuvbox cp
+### diskuvbox copy-dir
+
+### diskuvbox copy-file

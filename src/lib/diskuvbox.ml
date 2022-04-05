@@ -33,6 +33,25 @@ end
 
 let dir_dot = Fpath.v "."
 
+(* Windows 260 character limit friendly functions. Any failures with these
+   functions will tell you to look at the 260 character limit as an
+   explanation. *)
+
+let write ?mode file content =
+  match OS.File.write ?mode file content with
+  | Ok v -> Ok v
+  | Error m when Sys.win32 && String.length (Fpath.to_string file) >= 260 ->
+      Rresult.R.(
+        error_msg
+          (Fmt.str
+             "We recommend that you rename your directories to be smaller \
+              because there was a failure writing to the pathname %a. It is \
+              likely caused by that pathname exceeding the default Windows 260 \
+              character pathname limit. It may also be what the system \
+              reported: %a."
+             Fpath.pp file pp_msg m))
+  | Error msg -> Error msg
+
 (* Public Functions *)
 
 let current_directory ?(err = Fun.id) () =
@@ -108,7 +127,28 @@ let copy_dir ?(err = Fun.id) ~src ~dst () =
               if created then
                 Logs.debug (fun l ->
                     l "[copy_dir] Created directory %a" Fpath.pp parent_dst);
-              let+ () = OS.File.write ~mode dst data in
+              let* () =
+                if Sys.win32 then (
+                  (* Avoid the error:
+                        rename Z:\\source\\dkml-install-api\\_opam\\.opam-switch\\build\\dkml-installer-network-ocaml.0.4.0\\_build\\installer-work\\archive\\generic\\staging\\staging-unixutils\\generic\\bos-7a2f24.tmp to Z:\\source\\dkml-install-api\\_opam\\.opam-switch\\build\\dkml-installer-network-ocaml.0.4.0\\_build\\installer-work\\archive\\generic\\staging\\staging-unixutils\\generic\\unix_install.bc.exe: Permission denied
+                     Windows does not allow renames if the target file exists.
+
+                     But if we simply delete it we get the true error:
+                        delete file Z:\\source\\dkml-install-api\\_opam\\.opam-switch\\build\\dkml-installer-network-ocaml.0.4.0\\_build\\installer-work\\archive\\generic\\staging\\staging-unixutils\\generic\\unix_install.bc.exe: Permission denied
+                     which has permissions:
+                        -r-xr-xr-x
+
+                     So bos.0.2.1 is probably trying to delete but not checking
+                     for success, or not deleting at all. Either way it needs
+                     a chmod. Need to upstream a fix with bos.0.2.1 or perhaps
+                     Stdlib!
+                  *)
+                  let* exists = OS.File.exists dst in
+                  if exists then Unix.chmod (Fpath.to_string dst) 0o644;
+                  Ok ())
+                else Ok ()
+              in
+              let+ () = write ~mode dst data in
               ())
     in
     let* folds =
