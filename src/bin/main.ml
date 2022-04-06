@@ -39,15 +39,41 @@ let copts_t =
 
 (* Commands *)
 
-let source_dirs_t =
+let source_dirs_t ~verb =
   let doc =
-    "One or more source directories to copy. The command fails when a $(docv) \
-     does not exist."
+    Fmt.str
+      "One or more source directories %s. The command fails when a $(docv) \
+       does not exist."
+      verb
   in
   let stringdirlist_t =
     Arg.(non_empty & pos_left ~rev:true 0 dir [] & info [] ~doc ~docv:"SRCDIR")
   in
   Term.(const (List.map Fpath.v) $ stringdirlist_t)
+
+let source_files_t ~verb =
+  let doc =
+    Fmt.str
+      "One or more source files %s. The command fails when a $(docv) does not \
+       exist."
+      verb
+  in
+  let stringfilelist_t =
+    Arg.(
+      non_empty & pos_left ~rev:true 0 file [] & info [] ~doc ~docv:"SRCFILE")
+  in
+  Term.(const (List.map Fpath.v) $ stringfilelist_t)
+
+let source_file_t ~verb =
+  let doc =
+    Fmt.str
+      "The source file %s. The command fails when a $(docv) does not exist."
+      verb
+  in
+  let stringfile_t =
+    Arg.(required & pos 0 (some file) None & info [] ~doc ~docv:"SRCFILE")
+  in
+  Term.(const Fpath.v $ stringfile_t)
 
 let dest_dir_t =
   let doc =
@@ -61,7 +87,56 @@ let dest_dir_t =
   in
   Term.(const Fpath.v $ stringdir_t)
 
-let copy_directory_cmd =
+let dest_file_t =
+  let doc =
+    Fmt.str "Destination file. If $(docv) does not exist it will be created."
+  in
+  let stringfile_t =
+    Arg.(required & pos 1 (some string) None & info [] ~doc ~docv:"DESTFILE")
+  in
+  Term.(const Fpath.v $ stringfile_t)
+
+let copy_file_cmd =
+  let doc = "Copy a source file to a destination file." in
+  let man =
+    [
+      `S Manpage.s_description;
+      `P
+        "Copy the SRCFILE to the DESTFILE. $(b,copy-file) will follow symlinks.";
+    ]
+  in
+  let copy_file (_ : Log_config.t) src dst =
+    fail_if_error (Diskuvbox.copy_file ~err:box_err ~src ~dst ())
+  in
+  ( Term.(
+      const copy_file $ copts_t $ source_file_t ~verb:"to copy" $ dest_file_t),
+    Term.info "copy-file" ~doc ~exits:Term.default_exits ~man )
+
+let copy_file_into_cmd =
+  let doc = "Copy one or more files into a destination directory." in
+  let man =
+    [
+      `S Manpage.s_description;
+      `P
+        "Copy one or more SRCFILE... files to the DESTDIR directory. \
+         $(b,copy-files-into) will follow symlinks.";
+    ]
+  in
+  let copy_file_into (_ : Log_config.t) source_files dest_dir =
+    List.iter
+      (fun source_file ->
+        let dst = Fpath.(dest_dir / basename source_file) in
+        fail_if_error
+          (Diskuvbox.copy_file ~err:box_err ~src:source_file ~dst ()))
+      source_files
+  in
+  ( Term.(
+      const copy_file_into $ copts_t
+      $ source_files_t ~verb:"to copy"
+      $ dest_dir_t),
+    Term.info "copy-file-into" ~doc ~exits:Term.default_exits ~man )
+
+let copy_dir_cmd =
   let doc =
     "Copy content of one or more source directories to a destination directory."
   in
@@ -70,7 +145,7 @@ let copy_directory_cmd =
       `S Manpage.s_description;
       `P
         "Copy content of one or more SRCDIR... directories to the DESTDIR \
-         directory. $(b,copy-directory) will follow symlinks.";
+         directory. $(b,copy-dir) will follow symlinks.";
     ]
   in
   let copy_dir (_ : Log_config.t) source_dirs dest_dir =
@@ -80,7 +155,7 @@ let copy_directory_cmd =
           (Diskuvbox.copy_dir ~err:box_err ~src:source_dir ~dst:dest_dir ()))
       source_dirs
   in
-  ( Term.(const copy_dir $ copts_t $ source_dirs_t $ dest_dir_t),
+  ( Term.(const copy_dir $ copts_t $ source_dirs_t ~verb:"to copy" $ dest_dir_t),
     Term.info "copy-dir" ~doc ~exits:Term.default_exits ~man )
 
 let help_cmd =
@@ -102,6 +177,6 @@ let default_cmd =
     Term.info "diskuvbox" ~version:"%%VERSION%%" ~doc
       ~sdocs:Manpage.s_common_options )
 
-let cmds = [ copy_directory_cmd; help_cmd ]
+let cmds = [ copy_dir_cmd; copy_file_cmd; copy_file_into_cmd; help_cmd ]
 
 let () = Term.(exit @@ eval_choice default_cmd cmds)
