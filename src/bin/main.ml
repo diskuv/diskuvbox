@@ -64,6 +64,17 @@ let source_files_t ~verb =
   in
   Term.(const (List.map Fpath.v) $ stringfilelist_t)
 
+let touch_files_t =
+  let doc =
+    Fmt.str
+      "One or more files to touch. If a $(docv) does not exist it will be \
+       created."
+  in
+  let filelist_t =
+    Arg.(non_empty & pos_all string [] & info [] ~doc ~docv:"FILE")
+  in
+  Term.(const (List.map Fpath.v) $ filelist_t)
+
 let source_file_t ~verb =
   let doc =
     Fmt.str
@@ -158,6 +169,19 @@ let copy_dir_cmd =
   ( Term.(const copy_dir $ copts_t $ source_dirs_t ~verb:"to copy" $ dest_dir_t),
     Term.info "copy-dir" ~doc ~exits:Term.default_exits ~man )
 
+let touch_file_cmd =
+  let doc = "Touch one or more files." in
+  let man =
+    [ `S Manpage.s_description; `P "Touch one or more FILE... files." ]
+  in
+  let touch_file (_ : Log_config.t) files =
+    List.iter
+      (fun file -> fail_if_error (Diskuvbox.touch_file ~err:box_err ~file ()))
+      files
+  in
+  ( Term.(const touch_file $ copts_t $ touch_files_t),
+    Term.info "touch-file" ~doc ~exits:Term.default_exits ~man )
+
 let help_cmd =
   let doc = "display help about diskuvbox and diskuvbox commands" in
   let help (_ : Log_config.t) = `Help (`Pager, None) in
@@ -177,6 +201,7 @@ let default_cmd =
     Term.info "diskuvbox" ~version:"%%VERSION%%" ~doc
       ~sdocs:Manpage.s_common_options )
 
-let cmds = [ copy_dir_cmd; copy_file_cmd; copy_file_into_cmd; help_cmd ]
+let cmds =
+  [ copy_dir_cmd; copy_file_cmd; copy_file_into_cmd; touch_file_cmd; help_cmd ]
 
 let () = Term.(exit @@ eval_choice default_cmd cmds)

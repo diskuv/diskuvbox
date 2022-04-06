@@ -85,6 +85,23 @@ let absolute_path ?(err = Fun.id) fp =
     | Ok pwd -> Result.ok Fpath.(normalize (pwd // fp))
     | Error e -> Error e
 
+let touch_file ?(err = Fun.id) ~file () =
+  let open Monad_syntax_rresult (struct
+    let box_error = err
+  end) in
+  map_rresult_error_to_string ~err
+    (let parent_file = Fpath.parent file in
+     let* created = OS.Dir.create parent_file in
+     if created then
+       Logs.debug (fun l ->
+           l "[touch_file] Created directory %a" Fpath.pp parent_file);
+     let* exists = OS.File.exists file in
+     if exists then
+       (* Modify access and modification times to the current time (0.0). *)
+       Ok (Unix.utimes (Fpath.to_string file) 0.0 0.0)
+     else (* Write empty file *)
+       write ~mode:0o644 file "")
+
 let copy_file ?(err = Fun.id) ~src ~dst () =
   let open Monad_syntax_rresult (struct
     let box_error = err
