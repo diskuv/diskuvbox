@@ -1,4 +1,4 @@
-Show that nothing is in the directory
+Show that nothing important is in the directory
   $ ls | sort
   copy-dir.t
 

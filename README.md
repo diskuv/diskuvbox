@@ -17,6 +17,74 @@ over the default 260 character pathname limit.
 
 ## Script commands
 
+### diskuvbox find-up
+
+```console
+$ src/bin/main.exe find-up --help
+NAME
+       diskuvbox-find-up - Find a file in the current directory or one of its
+       ancestors.
+
+SYNOPSIS
+       diskuvbox find-up [OPTION]... FROMDIR BASENAME...
+
+DESCRIPTION
+       Find a file that matches the name as one or more specified FILE...
+       files in the FROMDIR directory.
+
+       Will print the matching file if found. Otherwise will print nothing.
+
+ARGUMENTS
+       BASENAME (required)
+           One or more basenames to search. The command fails when a BASENAME
+           is blank or has a directory separator.
+
+       FROMDIR (required)
+           Directory to search. The command fails when FROMDIR does not
+           exist.
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of `auto', `always' or
+           `never'.
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of `auto',
+           `pager', `groff' or `plain'. With `auto', the format is `pager` or
+           `plain' whenever the TERM env var is `dumb' or undefined.
+
+       --native
+           Print files and directories in native format. On Windows the
+           native format uses backslashes as directory separators, while on
+           Unix (including macOS) the native format uses forward slashes. If
+           --native is not specified then all files and directories are
+           printed with the directory separators as forward slashes.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning)
+           Be more or less verbose. LEVEL must be one of `quiet', `error',
+           `warning', `info' or `debug'. Takes over -v.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       find-up exits with the following status:
+
+       0   on success.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+```
+
 ### diskuvbox copy-dir
 
 ```console

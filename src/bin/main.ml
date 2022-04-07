@@ -75,6 +75,17 @@ let touch_files_t =
   in
   Term.(const (List.map Fpath.v) $ filelist_t)
 
+let basenames_t =
+  let doc =
+    Fmt.str
+      "One or more basenames to search. The command fails when a $(docv) is \
+       blank or has a directory separator."
+  in
+  let stringfilelist_t =
+    Arg.(non_empty & pos_right 0 string [] & info [] ~doc ~docv:"BASENAME")
+  in
+  Term.(const (List.map Fpath.v) $ stringfilelist_t)
+
 let source_file_t ~verb =
   let doc =
     Fmt.str
@@ -106,6 +117,34 @@ let dest_file_t =
     Arg.(required & pos 1 (some string) None & info [] ~doc ~docv:"DESTFILE")
   in
   Term.(const Fpath.v $ stringfile_t)
+
+let from_dir_t ~verb =
+  let doc =
+    Fmt.str "Directory %s. The command fails when $(docv) does not exist." verb
+  in
+  let stringfile_t =
+    Arg.(required & pos 0 (some dir) None & info [] ~doc ~docv:"FROMDIR")
+  in
+  Term.(const Fpath.v $ stringfile_t)
+
+let path_printer_t =
+  let doc =
+    Fmt.str
+      "Print files and directories in native format. On Windows the native \
+       format uses backslashes as directory separators, while on Unix \
+       (including macOS) the native format uses forward slashes. If $(opt) is \
+       not specified then all files and directories are printed with the \
+       directory separators as forward slashes."
+  in
+  let native_t = Arg.(value & flag & info [ "native" ] ~doc) in
+  let path_printer native =
+    if native then Fpath.pp
+    else fun fmt path ->
+      Format.pp_print_string fmt
+        (let s = Fmt.str "%a" Fpath.pp path in
+         String.map (function '\\' -> '/' | c -> c) s)
+  in
+  Term.(const path_printer $ native_t)
 
 let copy_file_cmd =
   let doc = "Copy a source file to a destination file." in
@@ -182,6 +221,31 @@ let touch_file_cmd =
   ( Term.(const touch_file $ copts_t $ touch_files_t),
     Term.info "touch-file" ~doc ~exits:Term.default_exits ~man )
 
+let find_up_cmd =
+  let doc = "Find a file in the current directory or one of its ancestors." in
+  let man =
+    [
+      `S Manpage.s_description;
+      `P
+        "Find a file that matches the name as one or more specified FILE... \
+         files in the FROMDIR directory.";
+      `P "Will print the matching file if found. Otherwise will print nothing.";
+    ]
+  in
+  let find_up (_ : Log_config.t) from_dir basenames path_printer =
+    let result =
+      fail_if_error (Diskuvbox.find_up ~err:box_err ~from_dir ~basenames ())
+    in
+    match result with
+    | Some path -> print_endline (Fmt.str "%a" path_printer path)
+    | None -> ()
+  in
+  ( Term.(
+      const find_up $ copts_t
+      $ from_dir_t ~verb:"to search"
+      $ basenames_t $ path_printer_t),
+    Term.info "find-up" ~doc ~exits:Term.default_exits ~man )
+
 let help_cmd =
   let doc = "display help about diskuvbox and diskuvbox commands" in
   let help (_ : Log_config.t) = `Help (`Pager, None) in
@@ -202,6 +266,13 @@ let default_cmd =
       ~sdocs:Manpage.s_common_options )
 
 let cmds =
-  [ copy_dir_cmd; copy_file_cmd; copy_file_into_cmd; touch_file_cmd; help_cmd ]
+  [
+    copy_dir_cmd;
+    copy_file_cmd;
+    copy_file_into_cmd;
+    touch_file_cmd;
+    find_up_cmd;
+    help_cmd;
+  ]
 
 let () = Term.(exit @@ eval_choice default_cmd cmds)

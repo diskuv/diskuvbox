@@ -85,6 +85,48 @@ let absolute_path ?(err = Fun.id) fp =
     | Ok pwd -> Result.ok Fpath.(normalize (pwd // fp))
     | Error e -> Error e
 
+let find_up ?(err = Fun.id) ?(max_ascent = 20) ~from_dir ~basenames () =
+  let open Monad_syntax_rresult (struct
+    let box_error = err
+  end) in
+  let rec validate = function
+    | [] -> Ok []
+    | hd :: tl -> (
+        let basename_norm = Fpath.normalize hd in
+        match List.length (Fpath.segs basename_norm) with
+        | 1 -> validate tl
+        | 0 ->
+            Rresult.R.error_msgf
+              "No basename can be empty. The find-up search was given the \
+               following basenames: %a"
+              Fmt.(Dump.list Fpath.pp)
+              basenames
+        | _ ->
+            Rresult.R.error_msgf
+              "Basenames cannot have directory separators. The find-up search \
+               was given the invalid basename: %a"
+              Fpath.pp hd)
+  in
+  let rec search path basenames_remaining ascents_remaining =
+    if ascents_remaining <= 0 || Fpath.is_root path then Ok None
+    else
+      match basenames_remaining with
+      | [] ->
+          let basedir, _rel = Fpath.split_base path in
+          search basedir basenames (ascents_remaining - 1)
+      | hd :: tl ->
+          let candidate = Fpath.(path // hd) in
+          let* exists = OS.File.exists candidate in
+          if exists then Ok (Some candidate)
+          else search path tl ascents_remaining
+  in
+  map_rresult_error_to_string ~err
+    (let* basenames = validate basenames in
+     let* from_dir = OS.Dir.must_exist from_dir in
+     search (Fpath.normalize from_dir)
+       (List.map Fpath.normalize basenames)
+       max_ascent)
+
 let touch_file ?(err = Fun.id) ~file () =
   let open Monad_syntax_rresult (struct
     let box_error = err
