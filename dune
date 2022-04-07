@@ -1,0 +1,44 @@
+; DO NOT ... DO NOT ... DO NOT ... update the README.md file automatically
+; as part of the build. We do not want upgrades to `cmdliner` to break
+; anybody's build!
+
+; Use the following to update the docs ...
+;   Windows: with-dkml dune build `@runmarkdown --auto-promote
+;   Unix: dune build @runmarkdown --auto-promote
+
+; BEGIN HACK - Workaround unsupported ```console blocks
+(rule
+ (deps README.md)
+ (target README.md.sh)
+ (action
+  (with-stdout-to
+   %{target}
+   (run sed "s/```console/```sh/g" %{deps}))))
+(rule
+ (deps README.md.sh)
+ (target README.md.sh.corrected)
+ (action
+  (run ocaml-mdx test --force-output %{deps})))
+(rule
+ (deps README.md.sh.corrected)
+ (target README.md.corrected)
+ (action
+  (with-stdout-to
+   %{target}
+   (run sed "s/```sh/```console/g" %{deps}))))
+(rule
+ (alias runmarkdown)
+ (action
+  (progn
+   (diff README.md README.md.corrected))))
+; END HACK
+
+; Use the following to update the docs ...
+;   Windows: with-dkml CORRECT_MARKDOWN=true dune runtest --auto-promote
+;   Unix: env CORRECT_MARKDOWN=true dune runtest --auto-promote
+
+; BEGIN EXPECTED
+; (mdx
+;  (enabled_if %{env:CORRECT_MARKDOWN=false})
+;  (files README.md))
+; END EXPECTED

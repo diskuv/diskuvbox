@@ -20,6 +20,7 @@ opam text
 *.sh text eol=lf
 *.mli text eol=lf
 *.ml text eol=lf
+*.md text eol=lf
 *.opam text eol=lf
 *.opam.template text eol=lf
 

@@ -3,6 +3,7 @@
 (name diskuvbox)
 (version 0.1.0)
 (cram enable)
+(using mdx 0.1)
 
 (generate_opam_files true)
 
@@ -24,4 +25,5 @@
   (bos      (>= 0.2.0))
   (fmt      (>= 0.8.9))
   (logs     (>= 0.7.0))
+  (mdx      (>= 2.0.0))
   (cmdliner (= 1.0.4))))
