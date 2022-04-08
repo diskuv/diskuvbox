@@ -1,7 +1,3 @@
-Show that nothing important is in the directory
-  $ ls | sort
-  touch-file.t
-
 Create a non-empty file
   $ echo hello > t_created_first
   $ sleep 0.1
@@ -13,15 +9,12 @@ Use diskuvbox to create files
   $ ../main.exe touch-file a b c d/e f/g/h t_created_first
 
 Verify new files were created
-  $ ls | sort
+  $ ls a b c t_created_first t_created_later
   a
   b
   c
-  d
-  f
   t_created_first
   t_created_later
-  touch-file.t
   $ ls d | sort
   e
   $ ls f | sort

@@ -1,7 +1,3 @@
-Show that nothing important is in the directory
-  $ ls | sort
-  copy-dir.t
-
 Create a few files in src1/, including a subdirectory
   $ install -d src1
   $ touch src1/a src1/b src1/c

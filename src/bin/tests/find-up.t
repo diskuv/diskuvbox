@@ -1,7 +1,3 @@
-Show that nothing important is in the directory
-  $ ls | sort
-  find-up.t
-
 Use diskuvbox to find a nonexistent file
   $ ../main.exe find-up . 09535a27-1559-492e-b674-b1a680623190.does.not.exist
 

@@ -1,7 +1,3 @@
-Show that nothing important is in the directory
-  $ ls | sort
-  copy-file-into.t
-
 Create a file
   $ touch a
 

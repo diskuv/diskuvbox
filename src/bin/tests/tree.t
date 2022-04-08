@@ -1,7 +1,3 @@
-Show that nothing important is in the directory
-  $ ls | sort
-  tree.t
-
 Create a complex directory structure
   $ install -d a/b/c/d/e/f
   $ install -d a/b2/c2/d2/e2/f2
