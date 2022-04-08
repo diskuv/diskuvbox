@@ -4,3 +4,10 @@
  (libraries bos fmt fpath rresult)
  (preprocess
   (pps ppx_deriving.ord)))
+
+; The only reason we use a (include ...) clause is so we can import the entire
+; dune.runlicense.inc as a real example inside README.md via the MDX plugin.
+;
+; If you are reading this, do not just blindly copy the (include) clause!
+; Just copy the contents of `dune.runlicense.inc` into your own dune file.
+(include dune.runlicense.inc)

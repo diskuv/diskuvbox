@@ -20,7 +20,7 @@
    %{target}
    (run sed "s/```console/```sh/g" %{deps}))))
 (rule
- (deps (:in README.md.sh) diskuvbox.exe)
+ (deps (:in README.md.sh) diskuvbox.exe src/lib/dune.runlicense.inc)
  (target README.md.sh.corrected)
  (action
   (run ocaml-mdx test --force-output %{in})))
@@ -44,7 +44,7 @@
 
 ; BEGIN EXPECTED
 ; (mdx
-;  (deps src/bin/main.exe) ; only available in Dune 3.0+
+;  (deps diskuvbox.exe src/lib/dune.runlicense.inc) ; only available in Dune 3.0+
 ;  (enabled_if %{env:CORRECT_MARKDOWN=false})
 ;  (files README.md))
 ; END EXPECTED

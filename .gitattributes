@@ -12,6 +12,7 @@
 Makefile text
 dune text
 dune-project text
+license-header.txt text
 opam text
 
 # Declare files that will always have LF line endings on checkout.
@@ -23,6 +24,7 @@ opam text
 *.md text eol=lf
 *.opam text eol=lf
 *.opam.template text eol=lf
+license-header.txt text eol=lf
 
 # Declare files that will always have CRLF line endings on checkout.
 *.sln text eol=crlf

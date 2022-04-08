@@ -1,3 +1,19 @@
+(******************************************************************************)
+(*  Copyright 2022 Diskuv, Inc.                                               *)
+(*                                                                            *)
+(*  Licensed under the Apache License, Version 2.0 (the "License");           *)
+(*  you may not use this file except in compliance with the License.          *)
+(*  You may obtain a copy of the License at                                   *)
+(*                                                                            *)
+(*      http://www.apache.org/licenses/LICENSE-2.0                            *)
+(*                                                                            *)
+(*  Unless required by applicable law or agreed to in writing, software       *)
+(*  distributed under the License is distributed on an "AS IS" BASIS,         *)
+(*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *)
+(*  See the License for the specific language governing permissions and       *)
+(*  limitations under the License.                                            *)
+(******************************************************************************)
+
 open Bos
 
 type box_error = string -> string
@@ -219,12 +235,14 @@ let touch_file ?(err = Fun.id) ~file () =
      else (* Write empty file *)
        write ~mode:0o644 file "")
 
-let copy_file ?(err = Fun.id) ~src ~dst () =
+let copy_file ?(err = Fun.id) ?mode ~src ~dst () =
   let open Monad_syntax_rresult (struct
     let box_error = err
   end) in
   map_rresult_error_to_string ~err
-    (let* mode = OS.Path.Mode.get src in
+    (let* mode =
+       match mode with Some m -> Ok m | None -> OS.Path.Mode.get src
+     in
      let* data = OS.File.read src in
      let parent_dst = Fpath.parent dst in
      let* created = OS.Dir.create parent_dst in

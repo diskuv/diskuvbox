@@ -1,3 +1,19 @@
+(******************************************************************************)
+(*  Copyright 2022 Diskuv, Inc.                                               *)
+(*                                                                            *)
+(*  Licensed under the Apache License, Version 2.0 (the "License");           *)
+(*  you may not use this file except in compliance with the License.          *)
+(*  You may obtain a copy of the License at                                   *)
+(*                                                                            *)
+(*      http://www.apache.org/licenses/LICENSE-2.0                            *)
+(*                                                                            *)
+(*  Unless required by applicable law or agreed to in writing, software       *)
+(*  distributed under the License is distributed on an "AS IS" BASIS,         *)
+(*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *)
+(*  See the License for the specific language governing permissions and       *)
+(*  limitations under the License.                                            *)
+(******************************************************************************)
+
 type box_error = string -> string
 (** The type for managing errors during box operations.
 
@@ -86,9 +102,17 @@ val touch_file : ?err:box_error -> file:Fpath.t -> unit -> (unit, string) result
     the identity function {!Fun.id}. *)
 
 val copy_file :
-  ?err:box_error -> src:Fpath.t -> dst:Fpath.t -> unit -> (unit, string) result
-(** [copy_file ?err ~src ~dst ()] copies the file [src] to the file [dst],
+  ?err:box_error ->
+  ?mode:int ->
+  src:Fpath.t ->
+  dst:Fpath.t ->
+  unit ->
+  (unit, string) result
+(** [copy_file ?err ?mode ~src ~dst ()] copies the file [src] to the file [dst],
     creating [dst]'s parent directories as necessary.
+    
+    If [mode] is specified, the chmod [mode] will be applied to [dst]. Otherwise
+    the chmod mode is copied from [src].
     
     Any error is passed to [err] if it is specified. The default [err] is
     the identity function {!Fun.id}. *)

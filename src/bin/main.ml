@@ -1,3 +1,19 @@
+(******************************************************************************)
+(*  Copyright 2022 Diskuv, Inc.                                               *)
+(*                                                                            *)
+(*  Licensed under the Apache License, Version 2.0 (the "License");           *)
+(*  you may not use this file except in compliance with the License.          *)
+(*  You may obtain a copy of the License at                                   *)
+(*                                                                            *)
+(*      http://www.apache.org/licenses/LICENSE-2.0                            *)
+(*                                                                            *)
+(*  Unless required by applicable law or agreed to in writing, software       *)
+(*  distributed under the License is distributed on an "AS IS" BASIS,         *)
+(*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *)
+(*  See the License for the specific language governing permissions and       *)
+(*  limitations under the License.                                            *)
+(******************************************************************************)
+
 (* Cmdliner 1.0 -> 1.1 deprecated a lot of things. But until Cmdliner 1.1
    is in common use in Opam packages we should provide backwards compatibility.
    In fact, Diskuv OCaml is not even using Cmdliner 1.1. *)
@@ -151,6 +167,20 @@ let path_printer_t =
   in
   Term.(const path_printer $ native_t)
 
+let chmod_mode_opt_t =
+  let doc =
+    "The chmod mode permission of the destination file, in octal. If not \
+     specified then the chmod mode permission of the source file is used. \
+     Examples: 644, 755."
+  in
+  let modestring_opt_t =
+    Arg.(value & opt (some string) None & info [ "m"; "mode" ] ~doc)
+  in
+  let from_octal s_opt =
+    match s_opt with Some s -> int_of_string_opt ("0o" ^ s) | None -> None
+  in
+  Term.(const from_octal $ modestring_opt_t)
+
 let copy_file_cmd =
   let doc = "Copy a source file to a destination file." in
   let man =
@@ -160,11 +190,14 @@ let copy_file_cmd =
         "Copy the SRCFILE to the DESTFILE. $(b,copy-file) will follow symlinks.";
     ]
   in
-  let copy_file (_ : Log_config.t) src dst =
-    fail_if_error (Diskuvbox.copy_file ~err:box_err ~src ~dst ())
+  let copy_file (_ : Log_config.t) src dst chmod_mode_opt =
+    fail_if_error
+      (Diskuvbox.copy_file ~err:box_err ?mode:chmod_mode_opt ~src ~dst ())
   in
   ( Term.(
-      const copy_file $ copts_t $ source_file_t ~verb:"to copy" $ dest_file_t),
+      const copy_file $ copts_t
+      $ source_file_t ~verb:"to copy"
+      $ dest_file_t $ chmod_mode_opt_t),
     Term.info "copy-file" ~doc ~exits:Term.default_exits ~man )
 
 let copy_file_into_cmd =
@@ -177,18 +210,19 @@ let copy_file_into_cmd =
          $(b,copy-files-into) will follow symlinks.";
     ]
   in
-  let copy_file_into (_ : Log_config.t) source_files dest_dir =
+  let copy_file_into (_ : Log_config.t) source_files dest_dir chmod_mode_opt =
     List.iter
       (fun source_file ->
         let dst = Fpath.(dest_dir / basename source_file) in
         fail_if_error
-          (Diskuvbox.copy_file ~err:box_err ~src:source_file ~dst ()))
+          (Diskuvbox.copy_file ~err:box_err ?mode:chmod_mode_opt
+             ~src:source_file ~dst ()))
       source_files
   in
   ( Term.(
       const copy_file_into $ copts_t
       $ source_files_t ~verb:"to copy"
-      $ dest_dir_t),
+      $ dest_dir_t $ chmod_mode_opt_t),
     Term.info "copy-file-into" ~doc ~exits:Term.default_exits ~man )
 
 let copy_dir_cmd =
@@ -279,7 +313,7 @@ let encoding_t =
       Fmt.(list ~sep:comma (pair ~sep:nop string nop))
       l
   in
-  let v = Arg.(value & opt (enum l) Ascii & info [ "encoding" ] ~doc) in
+  let v = Arg.(value & opt (enum l) Ascii & info [ "e"; "encoding" ] ~doc) in
   let f = function
     | Ascii ->
         {

@@ -33,3 +33,9 @@ If you would like to develop a new Box command, you will need to:
 * Add your new command to the `README.md` document. The help and examples
   in that document (for ones that start with ` ```console `) should be automatically generated after you run
   `dune build @runmarkdown --auto-promote`.
+
+Before submitting your PR make sure you have:
+1. Run `dune build`
+2. Run `dune runtest`
+3. Run `dune build @runmarkdown --auto-promote`
+4. Run `dune build @runlicense --auto-promote`

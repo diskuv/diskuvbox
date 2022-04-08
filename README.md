@@ -25,6 +25,7 @@ paths are over the Windows default 260 character pathname limit.
 | Section      | Page                                                                   |
 | ------------ | ---------------------------------------------------------------------- |
 | Usage        | [Add as an Opam Dependency](#add-as-an-opam-dependency)                |
+| Usage        | [Using in Dune rules](#using-in-dune-rules)                            |
 | Usage        | [Using in Dune cram tests](#using-in-dune-cram-tests)                  |
 | Usage        | [Using in Opam build steps](#using-in-opam-build-steps)                |
 | Box Commands | [Box Commands](#box-commands)                                          |
@@ -55,6 +56,54 @@ or the following to your `dune-project` if Dune auto-generates your opam files:
     (diskuvbox (>= 0.1.0))
   )
 )
+```
+
+### Using in Dune rules
+
+FIRST, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
+
+FINALLY, go ahead and use `diskuvbox` in your `dune` files. For example, we use
+[headache](https://github.com/Frama-C/headache/#readme) and
+[ocamlformat](https://github.com/ocaml-ppx/ocamlformat#readme) in Diskuv Box's
+`dune` files to ensure that our open-source Apache v2.0 headers are always at
+the top of the `diskuvbox.ml` and `diskuvbox.mli` source files.
+
+<!-- $MDX file=src/lib/dune.runlicense.inc -->
+```lisp
+; This first rule creates "corrected" source code in the Dune build directory
+; that always has an Apache v2.0 license at the top of each file.
+(rule
+ (targets diskuvbox.corrected.ml diskuvbox.corrected.mli)
+ (deps
+  (:license %{project_root}/etc/license-header.txt)
+  (:conf    %{project_root}/etc/headache.conf))
+ (action
+  (progn
+   ; 1. The `headache` program modifies files in-place, so we make a copy of
+   ;    the original file.
+   ; 2. On Windows `heachache` can fail with "Permission denied" if we don't
+   ;    set write permissions on the file.
+   ; `diskuvbox` can accomplish both goals on all its supported platforms.
+   (run diskuvbox copy-file -m 644 diskuvbox.ml  diskuvbox.corrected.ml)
+   (run diskuvbox copy-file -m 644 diskuvbox.mli diskuvbox.corrected.mli)
+   ; Add Apache v2.0 license to each file
+   (run headache -h %{license} -c %{conf} %{targets})
+   ; Use `ocamlformat` so that our source code modification is idempotent
+   (run ocamlformat --inplace %{targets}))))
+
+; These second set of rules let us type:
+;      dune build @runlicense --auto-promote
+;
+; Anytime we type that Dune will take the corrected source code from the Dune
+; build directory and use it to modify the original source code.
+(rule
+ (alias runlicense)
+ (action
+   (diff diskuvbox.ml  diskuvbox.corrected.ml)))
+(rule
+ (alias runlicense)
+ (action
+   (diff diskuvbox.mli diskuvbox.corrected.mli)))
 ```
 
 ### Using in Dune cram tests
@@ -243,6 +292,11 @@ OPTIONS
            `pager', `groff' or `plain'. With `auto', the format is `pager` or
            `plain' whenever the TERM env var is `dumb' or undefined.
 
+       -m VAL, --mode=VAL
+           The chmod mode permission of the destination file, in octal. If
+           not specified then the chmod mode permission of the source file is
+           used. Examples: 644, 755.
+
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 
@@ -301,6 +355,11 @@ OPTIONS
            Show this help in format FMT. The value FMT must be one of `auto',
            `pager', `groff' or `plain'. With `auto', the format is `pager` or
            `plain' whenever the TERM env var is `dumb' or undefined.
+
+       -m VAL, --mode=VAL
+           The chmod mode permission of the destination file, in octal. If
+           not specified then the chmod mode permission of the source file is
+           used. Examples: 644, 755.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -476,7 +535,7 @@ OPTIONS
            1 will, at most, print the contents of the starting directory.
            Defaults to 0
 
-       --encoding=VAL (absent=ASCII)
+       -e VAL, --encoding=VAL (absent=ASCII)
            The encoding of the graphic characters printed: ASCII, UTF-8.
            Defaults to ASCII
 
