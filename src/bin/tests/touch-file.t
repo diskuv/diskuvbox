@@ -4,6 +4,7 @@ Show that nothing important is in the directory
 
 Create a non-empty file
   $ echo hello > t_created_first
+  $ sleep 0.1
   $ echo hello > t_created_later
   $ if [ t_created_later -nt t_created_first ]; then echo GOOD; else echo BAD; fi
   GOOD

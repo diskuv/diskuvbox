@@ -26,7 +26,7 @@ If you would like to develop a new Box command, you will need to:
   and [src/lib/diskuvbox.ml](src/lib/diskuvbox.ml). Each command usually
   gets its own library function, but there are exceptions like
   the [copy-file](README.md#diskuvbox-copy-file) and [copy-file-into](README.md#diskuvbox-copy-file) commands that both use the same
-  `copy_file` library function.
+  [copy_file](https://diskuv.github.io/diskuvbox/diskuvbox/Diskuvbox/index.html#val-copy_file) library function.
 * Add a CLI command to [src/bin/main.ml](src/bin/main.ml).
 * Add a new test file in [src/bin/tests/](src/bin/tests/). Run them
   with `dune runtest`.
