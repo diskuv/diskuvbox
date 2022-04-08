@@ -21,6 +21,14 @@ paths are over the Windows default 260 character pathname limit.
 
 ## Box commands
 
+> Looking for the **[OCaml library](https://diskuv.github.io/diskuvbox/diskuvbox/index.html)**?
+> The library documentation is
+> available at https://diskuv.github.io/diskuvbox/diskuvbox/index.html.
+> Just use `opam install diskuvbox` (or `with-dkml opam install diskuvbox` with
+> the Diskuv OCaml Windows distribution) to install Diskuv Box in your existing
+> OCaml project.
+
+
 | Command                                     | Description                                                               |
 | ------------------------------------------- | ------------------------------------------------------------------------- |
 | [copy-dir](#diskuvbox-copy-dir)             | Copy content of one or more source directories to a destination directory |
@@ -29,6 +37,9 @@ paths are over the Windows default 260 character pathname limit.
 | [find-up](#diskuvbox-find-up)               | Find a file in the current directory or one of its ancestors              |
 | [touch](#diskuvbox-touch)                   | Touch one or more files                                                   |
 | [tree](#diskuvbox-tree)                     | Print a directory tree                                                    |
+
+If you would like to add or modify a Box command, head over to
+**[Your Contributions](CONTRIBUTORS.md)**.
 
 ### diskuvbox copy-dir
 
@@ -393,3 +404,14 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 ```
+
+## Contributions
+
+Head over to **[Your Contributions](CONTRIBUTORS.md)**.
+
+## Status
+
+| Status                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Box tests](https://github.com/diskuv/diskuvbox/actions/workflows/test.yml/badge.svg)](https://github.com/diskuv/diskuvbox/actions/workflows/test.yml)        |
+| [![Syntax check](https://github.com/diskuv/diskuvbox/actions/workflows/syntax.yml/badge.svg)](https://github.com/diskuv/diskuvbox/actions/workflows/syntax.yml) |
