@@ -58,61 +58,13 @@ or the following to your `dune-project` if Dune auto-generates your opam files:
 )
 ```
 
-### Using in Dune rules
-
-FIRST, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
-
-FINALLY, go ahead and use `diskuvbox` in your `dune` files. For example, we use
-[headache](https://github.com/Frama-C/headache/#readme) and
-[ocamlformat](https://github.com/ocaml-ppx/ocamlformat#readme) in Diskuv Box's
-`dune` files to ensure that our open-source Apache v2.0 headers are always at
-the top of the `diskuvbox.ml` and `diskuvbox.mli` source files.
-
-<!-- $MDX file=src/lib/dune.runlicense.inc -->
-```lisp
-; This first rule creates "corrected" source code in the Dune build directory
-; that always has an Apache v2.0 license at the top of each file.
-(rule
- (targets diskuvbox.corrected.ml diskuvbox.corrected.mli)
- (deps
-  (:license %{project_root}/etc/license-header.txt)
-  (:conf    %{project_root}/etc/headache.conf))
- (action
-  (progn
-   ; 1. The `headache` program modifies files in-place, so we make a copy of
-   ;    the original file.
-   ; 2. On Windows `heachache` can fail with "Permission denied" if we don't
-   ;    set write permissions on the file.
-   ; `diskuvbox` can accomplish both goals on all its supported platforms.
-   (run diskuvbox copy-file -m 644 diskuvbox.ml  diskuvbox.corrected.ml)
-   (run diskuvbox copy-file -m 644 diskuvbox.mli diskuvbox.corrected.mli)
-   ; Add Apache v2.0 license to each file
-   (run headache -h %{license} -c %{conf} %{targets})
-   ; Use `ocamlformat` so that our source code modification is idempotent
-   (run ocamlformat --inplace %{targets}))))
-
-; These second set of rules let us type:
-;      dune build @runlicense --auto-promote
-;
-; Anytime we type that Dune will take the corrected source code from the Dune
-; build directory and use it to modify the original source code.
-(rule
- (alias runlicense)
- (action
-   (diff diskuvbox.ml  diskuvbox.corrected.ml)))
-(rule
- (alias runlicense)
- (action
-   (diff diskuvbox.mli diskuvbox.corrected.mli)))
-```
-
 ### Using in Dune cram tests
 
 FIRST, make sure you understand and have enabled [Dune Cram Tests](https://dune.readthedocs.io/en/latest/tests.html#cram-tests-1).
 
 SECOND, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
 
-FINALLY, go ahead and use `diskuvbox` in your `.t` cram tests like:
+FINALLY, go ahead and use `diskuvbox` in your `.t` cram tests like so:
 
 <!-- $MDX file=src/bin/tests/tree-README-example.t -->
 ```console
@@ -157,6 +109,62 @@ on any platform that Diskuv Box supports!
                   └── f6/
 ```
 
+### Using in Dune rules
+
+FIRST, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
+
+THEN, go ahead and use `diskuvbox` as `(run diskuvbox ...)` in the rules of
+your `dune` files.
+
+For example, in the source code for this project we have detailed `dune` rules
+that ensure each OCaml source file always has our open-source Apache v2.0
+license at the top. We use `(run diskuvbox ...)` so that our already complex
+rules don't become even more complicated with platform specific hacks:
+
+<!-- $MDX file=src/lib/dune.runlicense.inc -->
+```lisp
+; This first rule creates "corrected" source code in the Dune build directory
+; that always has an Apache v2.0 license at the top of each file.
+(rule
+ (targets diskuvbox.corrected.ml diskuvbox.corrected.mli)
+ (deps
+  (:license %{project_root}/etc/license-header.txt)
+  (:conf    %{project_root}/etc/headache.conf))
+ (action
+  (progn
+   ; `headache` adds/replaces headers in source code. It is documented at
+   ; https://github.com/Frama-C/headache/#readme
+   ;
+   ; 1. The `headache` program modifies files in-place, so we make a copy of
+   ;    the original file.
+   ; 2. On Windows `heachache` can fail with "Permission denied" if we don't
+   ;    set write permissions on the file.
+   ; `diskuvbox` can accomplish both goals on all its supported platforms.
+   (run diskuvbox copy-file -m 644 diskuvbox.ml  diskuvbox.corrected.ml)
+   (run diskuvbox copy-file -m 644 diskuvbox.mli diskuvbox.corrected.mli)
+   ; Add Apache v2.0 license to each file
+   (run headache -h %{license} -c %{conf} %{targets})
+   ;
+   ; `ocamlformat` is used so that our source code modification is idempotent.
+   ; (Advanced: Options chosen so that continuous integration tests work with
+   ; any version of `ocamlformat`.)
+   (run ocamlformat --inplace --disable-conf-files --enable-outside-detected-project %{targets}))))
+
+; These second set of rules let us type:
+;      dune build @runlicense --auto-promote
+;
+; Anytime we type that Dune will take the corrected source code from the Dune
+; build directory and use it to modify the original source code.
+(rule
+ (alias runlicense)
+ (action
+   (diff diskuvbox.ml  diskuvbox.corrected.ml)))
+(rule
+ (alias runlicense)
+ (action
+   (diff diskuvbox.mli diskuvbox.corrected.mli)))
+```
+
 ### Using in Opam `build` steps
 
 FIRST, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
@@ -171,12 +179,24 @@ depends: [
 ]
 ```
 
+or in your `dune-project` if you auto-generate your .opam files:
+
+```lisp
+(package
+  ; ...
+  (depends
+    ; ...
+    (diskuvbox (and (>= 0.1.0) :build))
+  )
+)
+```
+
 FINALLY, go ahead and use `diskuvbox` in your .opam build steps like:
 
 ```powershell
 build: [
   # ...
-  ["diskuvbox" "copy-file-into" "assets/icon.png" "assets/public.gpg" "%{_:share}"]
+  ["diskuvbox" "copy-file-into" "assets/icon.png" "assets/public.gpg" "%{_:share}%"]
 ]
 ```
 

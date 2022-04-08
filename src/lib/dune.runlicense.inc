@@ -7,6 +7,9 @@
   (:conf    %{project_root}/etc/headache.conf))
  (action
   (progn
+   ; `headache` adds/replaces headers in source code. It is documented at
+   ; https://github.com/Frama-C/headache/#readme
+   ;
    ; 1. The `headache` program modifies files in-place, so we make a copy of
    ;    the original file.
    ; 2. On Windows `heachache` can fail with "Permission denied" if we don't
@@ -16,8 +19,11 @@
    (run diskuvbox copy-file -m 644 diskuvbox.mli diskuvbox.corrected.mli)
    ; Add Apache v2.0 license to each file
    (run headache -h %{license} -c %{conf} %{targets})
-   ; Use `ocamlformat` so that our source code modification is idempotent
-   (run ocamlformat --inplace %{targets}))))
+   ;
+   ; `ocamlformat` is used so that our source code modification is idempotent.
+   ; (Advanced: Options chosen so that continuous integration tests work with
+   ; any version of `ocamlformat`.)
+   (run ocamlformat --inplace --disable-conf-files --enable-outside-detected-project %{targets}))))
 
 ; These second set of rules let us type:
 ;      dune build @runlicense --auto-promote

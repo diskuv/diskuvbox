@@ -10,12 +10,10 @@
   (:conf    %{project_root}/etc/headache.conf))
  (action
   (progn
-   ; On Windows `heachache` can fail with "Permission denied" if we don't give
-   ; chmod u+w permissions. Diskuv Box can fix that.
    (run diskuvbox copy-file -m 644 main.ml       main.corrected.ml)
    (run diskuvbox copy-file -m 644 log_config.ml log_config.corrected.ml)
    (run headache -h %{license} -c %{conf} %{targets})
-   (run ocamlformat --inplace %{targets}))))
+   (run ocamlformat --inplace --disable-conf-files --enable-outside-detected-project %{targets}))))
 
 (rule
  (alias runlicense)
