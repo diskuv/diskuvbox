@@ -6,6 +6,11 @@
 ;   Windows: with-dkml dune build `@runmarkdown --auto-promote
 ;   Unix: dune build @runmarkdown --auto-promote
 
+; This is so that MDX can run `diskuvbox` directly.
+(rule
+ (target diskuvbox.exe)
+ (action (copy src/bin/main.exe %{target})))
+
 ; BEGIN HACK - Workaround unsupported ```console blocks
 (rule
  (deps README.md)
@@ -15,7 +20,7 @@
    %{target}
    (run sed "s/```console/```sh/g" %{deps}))))
 (rule
- (deps (:in README.md.sh) src/bin/main.exe)
+ (deps (:in README.md.sh) diskuvbox.exe)
  (target README.md.sh.corrected)
  (action
   (run ocaml-mdx test --force-output %{in})))

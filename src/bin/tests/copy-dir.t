@@ -17,7 +17,7 @@ Create directory src4/ with a symlink
   $ ln -s m src4/n
 
 Use diskuvbox to copy them. The destination directory should be autocreated.
-  $ ../main.exe copy-dir src1 src2 src3 src4 dest
+  $ diskuvbox copy-dir src1 src2 src3 src4 dest
 
 Verify
   $ ls dest | sort

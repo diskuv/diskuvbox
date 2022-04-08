@@ -8,7 +8,7 @@ Create non-empty files.
   GOOD
 
 Use diskuvbox to create files
-  $ ../main.exe touch-file a b c d/e f/g/h t_created_first
+  $ diskuvbox touch-file a b c d/e f/g/h t_created_first
 
 Verify new files were created
   $ ls a b c t_created_first t_created_later

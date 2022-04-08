@@ -1,7 +1,8 @@
 # Diskuv Box
 
 A basic, cross-platform set of commands to manipulate and query the file
-system. Available as a single binary (`diskuvbox`, or `diskuvbox.exe` on
+system. Available with a [liberal open-source license](LICENSE) as a single
+binary (`diskuvbox`, or `diskuvbox.exe` on
 Windows) or as an OCaml library with minimal dependencies.
 
 The single binary design is similar to
@@ -18,6 +19,117 @@ use options like `--native`. **Feel comfortable using the diskuvbox commands
 in CRAM tests and expect scripts**.
 * On Windows, any failing command will provide a helpful error message if the
 paths are over the Windows default 260 character pathname limit.
+
+**Quick Links**
+
+| Section      | Page                                                                   |
+| ------------ | ---------------------------------------------------------------------- |
+| Usage        | [Add as an Opam Dependency](#add-as-an-opam-dependency)                |
+| Usage        | [Using in Dune cram tests](#using-in-dune-cram-tests)                  |
+| Usage        | [Using in Opam build steps](#using-in-opam-build-steps)                |
+| Box Commands | [Box Commands](#box-commands)                                          |
+| Box Library  | [Box Library](https://diskuv.github.io/diskuvbox/diskuvbox/index.html) |
+| Contributing | [Your Contributions](CONTRIBUTORS.md)                                  |
+
+## Usage
+
+### Add as an Opam Dependency
+
+If you are an OCaml developer who creates or maintains an Opam package, add
+the following to your `.opam` file:
+
+```powershell
+depends: [
+  # ...
+  "diskuvbox" {>= "0.1.0"}
+]
+```
+
+or the following to your `dune-project` if Dune auto-generates your opam files:
+
+```lisp
+(package
+  ; ...
+  (depends
+    ; ...
+    (diskuvbox (>= 0.1.0))
+  )
+)
+```
+
+### Using in Dune cram tests
+
+FIRST, make sure you understand and have enabled [Dune Cram Tests](https://dune.readthedocs.io/en/latest/tests.html#cram-tests-1).
+
+SECOND, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
+
+FINALLY, go ahead and use `diskuvbox` in your `.t` cram tests like:
+
+<!-- $MDX file=src/bin/tests/tree-README-example.t -->
+```console
+Use your program. We'll pretend for this example that your program
+creates a complex directory structure.
+  $ install -d a/b/c/d/e/f
+  $ install -d a/b2/c2/d2/e2/f2
+  $ install -d a/b2/c3/d3/e3/f3
+  $ install -d a/b2/c3/d4/e4/f4
+  $ install -d a/b2/c3/d4/e5/f5
+  $ install -d a/b2/c3/d4/e5/f6
+  $ touch a/b/x
+  $ touch a/b/c/y
+  $ touch a/b/c/d/z
+
+Use diskuvbox to print the directory tree. It should be reproducible
+on any platform that Diskuv Box supports!
+  $ diskuvbox tree a --max-depth 10 --encoding UTF-8
+  a
+  ├── b/
+  │   ├── c/
+  │   │   ├── d/
+  │   │   │   ├── e/
+  │   │   │   │   └── f/
+  │   │   │   └── z
+  │   │   └── y
+  │   └── x
+  └── b2/
+      ├── c2/
+      │   └── d2/
+      │       └── e2/
+      │           └── f2/
+      └── c3/
+          ├── d3/
+          │   └── e3/
+          │       └── f3/
+          └── d4/
+              ├── e4/
+              │   └── f4/
+              └── e5/
+                  ├── f5/
+                  └── f6/
+```
+
+### Using in Opam `build` steps
+
+FIRST, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
+
+SECOND, if you are sure that you *only* need diskuvbox for Opam build steps,
+change your `.opam` file so it has a `{build}` filter. For example:
+
+```powershell
+depends: [
+  # ...
+  "diskuvbox" {>= "0.1.0" & build}
+]
+```
+
+FINALLY, go ahead and use `diskuvbox` in your .opam build steps like:
+
+```powershell
+build: [
+  # ...
+  ["diskuvbox" "copy-file-into" "assets/icon.png" "assets/public.gpg" "%{_:share}"]
+]
+```
 
 ## Box commands
 
@@ -44,7 +156,7 @@ If you would like to add or modify a Box command, head over to
 ### diskuvbox copy-dir
 
 ```console
-$ src/bin/main.exe copy-dir --help
+$ diskuvbox copy-dir --help
 NAME
        diskuvbox-copy-dir - Copy content of one or more source directories to
        a destination directory.
@@ -103,7 +215,7 @@ EXIT STATUS
 ### diskuvbox copy-file
 
 ```console
-$ src/bin/main.exe copy-file --help
+$ diskuvbox copy-file --help
 NAME
        diskuvbox-copy-file - Copy a source file to a destination file.
 
@@ -159,7 +271,7 @@ EXIT STATUS
 ### diskuvbox copy-file-into
 
 ```console
-$ src/bin/main.exe copy-file-into --help
+$ diskuvbox copy-file-into --help
 NAME
        diskuvbox-copy-file-into - Copy one or more files into a destination
        directory.
@@ -218,7 +330,7 @@ EXIT STATUS
 ### diskuvbox find-up
 
 ```console
-$ src/bin/main.exe find-up --help
+$ diskuvbox find-up --help
 NAME
        diskuvbox-find-up - Find a file in the current directory or one of its
        ancestors.
@@ -286,7 +398,7 @@ EXIT STATUS
 ### diskuvbox touch
 
 ```console
-$ src/bin/main.exe touch --help
+$ diskuvbox touch --help
 NAME
        diskuvbox-touch-file - Touch one or more files.
 
@@ -339,7 +451,7 @@ EXIT STATUS
 ### diskuvbox tree
 
 ```console
-$ src/bin/main.exe tree --help
+$ diskuvbox tree --help
 NAME
        diskuvbox-tree - Print a directory tree.
 
