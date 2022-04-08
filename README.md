@@ -409,6 +409,16 @@ EXIT STATUS
 
 Head over to **[Your Contributions](CONTRIBUTORS.md)**.
 
+## Acknowledgements
+
+The first implementations of Diskuv Box were implemented with the assistance of
+the [OCaml Software Foundation (OCSF)](http://ocaml-sf.org),
+a sub-foundation of the [INRIA Foundation](https://www.inria.fr).
+
+Two OCaml libraries ([bos](https://erratique.ch/software/bos) and
+[cmdliner](https://erratique.ch/software/cmdliner)) are essential to Diskuv Box;
+these libraries were created by [Daniel Bünzli](https://erratique.ch/profile).
+
 ## Status
 
 | Status                                                                                                                                                          |
