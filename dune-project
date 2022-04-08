@@ -20,7 +20,8 @@
   "A cross-platform basic set of script commands. Available as a single binary (`diskuvbox`, or `diskuvbox.exe` on Windows) and as an OCaml library.")
  (depends
   (odoc     (and (>= 1.5.3) :with-doc))
-  (ocaml    (>= 4.08.0))
+  ; minimums come from matrix testing in .github/workflows/test.yml
+  (ocaml    (>= 4.09.0))
   ; all of these may go lower; simply has not been tested
   (ppx_deriving (>= 5.2.1))
   (bos      (>= 0.2.0))

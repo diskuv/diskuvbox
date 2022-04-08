@@ -15,7 +15,24 @@ jobs:
           - ubuntu-latest
           - macos-latest
         ocaml-compiler:
-          - '4.08.0'
+          # Why not 4.08.0?
+          #
+          # It fails on macos: https://github.com/diskuv/diskuvbox/runs/5891371632?check_suite_focus=true
+          #
+          #=== ERROR while compiling ppx_deriving.5.2.1 =================================#
+          # context     2.1.2 | macos/x86_64 | ocaml-base-compiler.4.08.0 | git+https://github.com/ocaml/opam-repository.git
+          # path        ~/work/diskuvbox/diskuvbox/_opam/.opam-switch/build/ppx_deriving.5.2.1
+          # command     ~/.opam/opam-init/hooks/sandbox.sh build dune build -p ppx_deriving -j 3
+          # exit-code   1
+          # env-file    ~/.opam/log/ppx_deriving-6411-7f9caa.env
+          # output-file ~/.opam/log/ppx_deriving-6411-7f9caa.out
+          ### output ###
+          # File "src_plugins/create/dune", line 11, characters 2-23:
+          # 11 |   (pps ppxlib.metaquot))
+          #        ^^^^^^^^^^^^^^^^^^^^^
+          # (cd _build/default && .ppx/0224ad3443a846e54f1637fccb074e7d/ppx.exe --cookie 'library-name="ppx_deriving_create"' -o src_plugins/create/ppx_deriving_create.pp.ml --impl src_plugins/create/ppx_deriving_create.ml -corrected-suffix .ppx-corrected -diff-cmd - -dump-ast)
+          # Command got signal KILL.
+          - '4.09.0'
           - '4.13.x'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}-${{ matrix.ocaml-compiler }}
@@ -23,17 +40,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: OCaml ${{ matrix.ocaml-compiler }}
+      - name: OCaml ${{ matrix.ocaml-compiler }} with Dune cache
         uses: ocaml/setup-ocaml@v2
+        if: ${{ !startsWith(matrix.os, 'windows-') }}
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: true
+      - name: OCaml ${{ matrix.ocaml-compiler }} without Dune cache
+        uses: ocaml/setup-ocaml@v2
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: false
       - name: Install Opam dependencies
         run: opam install . --deps-only --with-test
       - name: Build OCaml
         run: opam exec -- dune build
-      - name: Test OCaml
-        if: "!( ${{ startsWith(matrix.os, 'ubuntu-') }} )"
+      - name: Test OCaml excluding timestamp tests
+        if: ${{ !startsWith(matrix.os, 'ubuntu-') }}
         run: opam exec -- dune runtest
       - name: Test OCaml including timestamp tests
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
