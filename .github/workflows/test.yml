@@ -55,10 +55,10 @@ jobs:
       - name: Install Opam dependencies
         run: opam install . --deps-only --with-test
       - name: Build OCaml
-        run: opam exec -- dune build
+        run: opam exec -- dune build --display=short
       - name: Test OCaml excluding timestamp tests
         if: ${{ !startsWith(matrix.os, 'ubuntu-') }}
-        run: opam exec -- dune runtest
+        run: opam exec -- dune runtest --display=short
       - name: Test OCaml including timestamp tests
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
-        run: opam exec -- env BOX_TIMESTAMP_TESTS=true dune runtest
+        run: opam exec -- env BOX_TIMESTAMP_TESTS=true dune runtest --display=short
