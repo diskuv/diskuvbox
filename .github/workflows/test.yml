@@ -10,10 +10,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: windows-latest
-          - os: ubuntu-latest
-          - os: macos-latest
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
         ocaml-compiler:
           - '4.08.0'
           - '4.13.x'
