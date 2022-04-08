@@ -1,4 +1,6 @@
 (library
  (name diskuvbox)
  (public_name diskuvbox)
- (libraries bos fmt fpath rresult))
+ (libraries bos fmt fpath rresult)
+ (preprocess
+  (pps ppx_deriving.ord)))

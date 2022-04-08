@@ -28,6 +28,7 @@ paths are over the Windows default 260 character pathname limit.
 | [copy-file-into](#diskuvbox-copy-file-into) | Copy one or more files into a destination directory                       |
 | [find-up](#diskuvbox-find-up)               | Find a file in the current directory or one of its ancestors              |
 | [touch](#diskuvbox-touch)                   | Touch one or more files                                                   |
+| [tree](#diskuvbox-tree)                     | Print a directory tree                                                    |
 
 ### diskuvbox copy-dir
 
@@ -315,6 +316,75 @@ OPTIONS
 
 EXIT STATUS
        touch-file exits with the following status:
+
+       0   on success.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+```
+
+### diskuvbox tree
+
+```console
+$ src/bin/main.exe tree --help
+NAME
+       diskuvbox-tree - Print a directory tree.
+
+SYNOPSIS
+       diskuvbox tree [OPTION]... DIR
+
+DESCRIPTION
+       Print the directory tree starting at the DIR directory.
+
+ARGUMENTS
+       DIR (required)
+           Directory to print. The command fails when DIR does not exist.
+
+OPTIONS
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of `auto', `always' or
+           `never'.
+
+       -d VAL, --max-depth=VAL (absent=0)
+           Maximum depth to print. A maximum depth of 0 will never print
+           deeper than the name of the starting directory. A maximum depth of
+           1 will, at most, print the contents of the starting directory.
+           Defaults to 0
+
+       --encoding=VAL (absent=ASCII)
+           The encoding of the graphic characters printed: ASCII, UTF-8.
+           Defaults to ASCII
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of `auto',
+           `pager', `groff' or `plain'. With `auto', the format is `pager` or
+           `plain' whenever the TERM env var is `dumb' or undefined.
+
+       --native
+           Print files and directories in native format. On Windows the
+           native format uses backslashes as directory separators, while on
+           Unix (including macOS) the native format uses forward slashes. If
+           --native is not specified then all files and directories are
+           printed with the directory separators as forward slashes.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning)
+           Be more or less verbose. LEVEL must be one of `quiet', `error',
+           `warning', `info' or `debug'. Takes over -v.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       tree exits with the following status:
 
        0   on success.
 

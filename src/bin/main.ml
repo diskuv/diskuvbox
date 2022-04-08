@@ -118,12 +118,12 @@ let dest_file_t =
   in
   Term.(const Fpath.v $ stringfile_t)
 
-let from_dir_t ~verb =
+let dir_t ~verb ~docv =
   let doc =
     Fmt.str "Directory %s. The command fails when $(docv) does not exist." verb
   in
   let stringfile_t =
-    Arg.(required & pos 0 (some dir) None & info [] ~doc ~docv:"FROMDIR")
+    Arg.(required & pos 0 (some dir) None & info [] ~doc ~docv)
   in
   Term.(const Fpath.v $ stringfile_t)
 
@@ -242,9 +242,131 @@ let find_up_cmd =
   in
   ( Term.(
       const find_up $ copts_t
-      $ from_dir_t ~verb:"to search"
+      $ dir_t ~verb:"to search" ~docv:"FROMDIR"
       $ basenames_t $ path_printer_t),
     Term.info "find-up" ~doc ~exits:Term.default_exits ~man )
+
+let max_depth_t =
+  let doc =
+    "Maximum depth to print. A maximum depth of 0 will never print deeper than \
+     the name of the starting directory. A maximum depth of 1 will, at most, \
+     print the contents of the starting directory. Defaults to 0"
+  in
+  Arg.(value & opt int 0 & info [ "d"; "max-depth" ] ~doc)
+
+type charsets = Ascii | Utf8
+
+type print_char_pairs = {
+  down : string;
+  down_halfright : string;
+  halfdown_halfright : string;
+  right : string;
+  halfright : string;
+}
+
+type encoding = { print_char_pairs : print_char_pairs }
+
+let encoding_t =
+  let l = [ ("ASCII", Ascii); ("UTF-8", Utf8) ] in
+  let doc =
+    Fmt.str
+      "The encoding of the graphic characters printed: %a. Defaults to ASCII"
+      Fmt.(list ~sep:comma (pair ~sep:nop string nop))
+      l
+  in
+  let v = Arg.(value & opt (enum l) Ascii & info [ "encoding" ] ~doc) in
+  let f = function
+    | Ascii ->
+        {
+          print_char_pairs =
+            {
+              down = "| ";
+              down_halfright = "|-";
+              halfdown_halfright = "`-";
+              right = "--";
+              halfright = "- ";
+            };
+        }
+    | Utf8 ->
+        {
+          print_char_pairs =
+            {
+              down = "│ ";
+              down_halfright = "├─";
+              halfdown_halfright = "└─";
+              right = "──";
+              halfright = "─ ";
+            };
+        }
+  in
+  Term.(const f $ v)
+
+let tree_cmd =
+  let doc = "Print a directory tree." in
+  let man =
+    [
+      `S Manpage.s_description;
+      `P "Print the directory tree starting at the DIR directory.";
+    ]
+  in
+  let tree (_ : Log_config.t) dir max_depth path_printer { print_char_pairs } =
+    let _padding d = String.make d ' ' in
+    let entry_pp fmt = function
+      | Diskuvbox.Directory relpath ->
+          Fmt.pf fmt "%a/" path_printer (Fpath.base relpath)
+      | File relpath -> Fmt.pf fmt "%a" path_printer (Fpath.base relpath)
+      | Root -> failwith "Should never have entry_pp on a Root"
+    in
+    let dirs_finished = Array.make max_depth false in
+    let veins ~last depth =
+      if depth <= 0 then [||]
+      else
+        let char_pairs = Array.make (depth * 2) "  " in
+        (* set all but the last 2 pairs of characters *)
+        if depth >= 2 then
+          for d_i = 0 to depth - 2 do
+            if not dirs_finished.(d_i) then
+              Array.set char_pairs (d_i * 2) print_char_pairs.down
+          done;
+        (* set the 2nd last pair of characters *)
+        Array.set char_pairs
+          ((depth * 2) - 2)
+          (if last then print_char_pairs.halfdown_halfright
+          else if dirs_finished.(depth - 1) then print_char_pairs.right
+          else print_char_pairs.down_halfright);
+        (* set the last pair of characters *)
+        Array.set char_pairs ((depth * 2) - 1) print_char_pairs.halfright;
+        char_pairs
+    in
+    let veins_pp = Fmt.(array ~sep:nop string) in
+    let f ~depth ~path_attributes walk_path =
+      let open Diskuvbox in
+      match
+        (depth, Path_attributes.mem Last_in_directory path_attributes, walk_path)
+      with
+      | 0, _, _ ->
+          print_endline @@ Fmt.str "%a" path_printer dir;
+          Ok ()
+      | _, false, _ ->
+          Array.set dirs_finished (depth - 1) false;
+          print_endline
+          @@ Fmt.str "%a%a" veins_pp (veins ~last:false depth) entry_pp
+               walk_path;
+          Ok ()
+      | _, true, _ ->
+          print_endline
+          @@ Fmt.str "%a%a" veins_pp (veins ~last:true depth) entry_pp walk_path;
+          Array.set dirs_finished (depth - 1) true;
+          Ok ()
+    in
+    fail_if_error
+      (Diskuvbox.walk_down ~err:box_err ~max_depth ~from_path:dir ~f ())
+  in
+  ( Term.(
+      const tree $ copts_t
+      $ dir_t ~verb:"to print" ~docv:"DIR"
+      $ max_depth_t $ path_printer_t $ encoding_t),
+    Term.info "tree" ~doc ~exits:Term.default_exits ~man )
 
 let help_cmd =
   let doc = "display help about diskuvbox and diskuvbox commands" in
@@ -272,6 +394,7 @@ let cmds =
     copy_file_into_cmd;
     touch_file_cmd;
     find_up_cmd;
+    tree_cmd;
     help_cmd;
   ]
 

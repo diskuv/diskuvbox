@@ -5,6 +5,54 @@ type box_error = string -> string
     This function can log the error, modify the error message, or raise the
     error immediately. *)
 
+(** The type of path seen during a {!walk_down} operation *)
+type walk_path = Root | File of Fpath.t | Directory of Fpath.t
+
+(** Attributes of the path *)
+type path_attribute = First_in_directory | Last_in_directory
+
+module Path_attributes : Set.S with type elt = path_attribute
+
+val walk_down :
+  ?err:box_error ->
+  ?max_depth:int ->
+  from_path:Fpath.t ->
+  f:
+    (depth:int ->
+    path_attributes:Path_attributes.t ->
+    walk_path ->
+    (unit, string) result) ->
+  unit ->
+  (unit, string) result
+(** [walk_down ?err ?max_depth ~from_path ~f ()] visits the file [from_path]
+    or walks down a directory tree [file_path], executing
+    [f ~depth ~path_attributes path] on every file and directory.
+    
+    Symlinks are followed.
+  
+    When [from_path] is a file, [f] will be called on [from_path] and that
+    is the completion of the [walk_down] procedure.
+
+    When [from_path] is a directory, the traversal is pre-order, meaning that
+    [f] is called on a directory ["A"] before [f] is called on any children of
+    directory ["A"]. All children in a directory are traversed in lexographical
+    order.
+
+    The [path] in [f ~depth ~path_attributes path] will be [Root] if the
+    current file or directory is [from_path]; otherwise the
+    [path = File relpath] or [path = Directory relpath] has a [relpath]
+    which is a relative path from [from_path] to the current file or directory.
+
+    The [depth] in [f ~depth ~path_attributes path] will be an integer from 0
+    to [max_depth], inclusive.
+    
+    At most [max_depth] descendants of [from_path] will be walked. When
+    [max_depth] is [0] no descent into a directory is ever conducted.
+    The default [max_depth] is 0.
+    
+    Any error is passed to [err] if it is specified. The default [err] is
+    the identity function {!Fun.id}. *)
+
 val find_up :
   ?err:box_error ->
   ?max_ascent:int ->
@@ -12,9 +60,9 @@ val find_up :
   basenames:Fpath.t list ->
   unit ->
   (Fpath.t option, string) result
-(** [find_up ?err ?max_ascent ~from_dir ~basenames] searches the directory [from_dir]
-    for any file with a name in the list [basenames]. If not found, the
-    parent directory of [from_dir] is searched for the file named in
+(** [find_up ?err ?max_ascent ~from_dir ~basenames ()] searches the directory
+    [from_dir] for any file with a name in the list [basenames]. If not found,
+    the parent directory of [from_dir] is searched for the file named in
     [basenames].
     
     At most [max_ascent] ancestors of [from_dir] will be searched

@@ -22,6 +22,7 @@
   (odoc     (and (>= 1.5.3) :with-doc))
   ; all of these may go lower; simply has not been tested
   (ocaml    (>= 4.12.1))
+  (ppx_deriving (>= 5.2.1))
   (bos      (>= 0.2.0))
   (fmt      (>= 0.8.9))
   (logs     (>= 0.7.0))

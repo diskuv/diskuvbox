@@ -1,8 +1,18 @@
 open Bos
 
-(* Error Handling *)
-
 type box_error = string -> string
+
+type walk_path = Root | File of Fpath.t | Directory of Fpath.t
+
+type path_attribute = First_in_directory | Last_in_directory [@@deriving ord]
+
+module Path_attributes = Set.Make (struct
+  type t = path_attribute
+
+  let compare = compare_path_attribute
+end)
+
+(* Error Handling *)
 
 let rresult_error_to_string ~err msg = err (Fmt.str "%a" Rresult.R.pp_msg msg)
 
@@ -84,6 +94,71 @@ let absolute_path ?(err = Fun.id) fp =
     match current_directory ~err () with
     | Ok pwd -> Result.ok Fpath.(normalize (pwd // fp))
     | Error e -> Error e
+
+let walk_down ?(err = Fun.id) ?(max_depth = 0) ~from_path ~f () =
+  let open Monad_syntax_rresult (struct
+    let box_error = err
+  end) in
+  let rec walk walk_path path_on_fs path_attributes depth =
+    (* pre-order traversal: visit the path first *)
+    let* () =
+      map_string_to_rresult_error (f ~depth ~path_attributes walk_path)
+    in
+    let* path_is_dir, child_pathize =
+      match walk_path with
+      | Root ->
+          let* dir_exists = OS.Dir.exists path_on_fs in
+          Ok (dir_exists, fun child -> child)
+      | File relpath ->
+          let raise_err _child =
+            failwith
+              (Fmt.str
+                 "Should be impossible to descend below the File %a. Started \
+                  from %a and got to %a"
+                 Fpath.pp relpath Fpath.pp from_path Fpath.pp path_on_fs)
+          in
+          Ok (false, raise_err)
+      | Directory relpath -> Ok (true, fun child -> Fpath.(relpath // child))
+    in
+    match path_is_dir with
+    | true ->
+        if depth < max_depth then
+          (* pre-order traversal: descend last *)
+          let rec siblings ~first = function
+            | [] -> Ok ()
+            | hd :: tl ->
+                let child_path_attributes =
+                  match (first, tl = []) with
+                  | false, true -> Path_attributes.of_list [ Last_in_directory ]
+                  | true, true ->
+                      Path_attributes.of_list
+                        [ First_in_directory; Last_in_directory ]
+                  | true, _ -> Path_attributes.of_list [ First_in_directory ]
+                  | _ -> Path_attributes.empty
+                in
+                let child_path_on_fs = Fpath.(path_on_fs // hd) in
+                let* child_dir_exists = OS.Dir.exists child_path_on_fs in
+                let* () =
+                  match child_dir_exists with
+                  | true ->
+                      walk
+                        (Directory (child_pathize hd))
+                        child_path_on_fs child_path_attributes (depth + 1)
+                  | false ->
+                      walk
+                        (File (child_pathize hd))
+                        child_path_on_fs child_path_attributes (depth + 1)
+                in
+                siblings ~first:false tl
+          in
+          let* dir_entries = OS.Dir.contents ~rel:true path_on_fs in
+          let sorted_dir_entries = List.sort Fpath.compare dir_entries in
+          let* () = siblings ~first:true sorted_dir_entries in
+          Ok ()
+        else Ok ()
+    | false -> Ok ()
+  in
+  map_rresult_error_to_string ~err (walk Root from_path Path_attributes.empty 0)
 
 let find_up ?(err = Fun.id) ?(max_ascent = 20) ~from_dir ~basenames () =
   let open Monad_syntax_rresult (struct

@@ -15,10 +15,10 @@
    %{target}
    (run sed "s/```console/```sh/g" %{deps}))))
 (rule
- (deps README.md.sh)
+ (deps (:in README.md.sh) src/bin/main.exe)
  (target README.md.sh.corrected)
  (action
-  (run ocaml-mdx test --force-output %{deps})))
+  (run ocaml-mdx test --force-output %{in})))
 (rule
  (deps README.md.sh.corrected)
  (target README.md.corrected)
@@ -39,6 +39,7 @@
 
 ; BEGIN EXPECTED
 ; (mdx
+;  (deps src/bin/main.exe) ; only available in Dune 3.0+
 ;  (enabled_if %{env:CORRECT_MARKDOWN=false})
 ;  (files README.md))
 ; END EXPECTED
