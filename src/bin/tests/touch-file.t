@@ -1,8 +1,10 @@
-Create a non-empty file
+Create non-empty files.
+| Since modification timestamps are hard to test cross-platform (portably), we
+| only do it if BOX_TIMESTAMP_TESTS=true
   $ echo hello > t_created_first
-  $ sleep 0.1
+  $ if [ "$BOX_TIMESTAMP_TESTS" = true ]; then sleep 0.1; fi
   $ echo hello > t_created_later
-  $ if [ t_created_later -nt t_created_first ]; then echo GOOD; else echo BAD; fi
+  $ if [ "$BOX_TIMESTAMP_TESTS" != true ] || [ t_created_later -nt t_created_first ]; then echo GOOD; else echo BAD; fi
   GOOD
 
 Use diskuvbox to create files
@@ -27,5 +29,5 @@ Verify that the pre-existing touched file still has the same contents
   hello
 
 Verify that the pre-existing touched file has timestamp newer than a file created later
-  $ if [ t_created_first -nt t_created_later ]; then echo GOOD; else echo BAD; fi
+  $ if [ "$BOX_TIMESTAMP_TESTS" != true ] || [ t_created_first -nt t_created_later ]; then echo GOOD; else echo BAD; fi
   GOOD

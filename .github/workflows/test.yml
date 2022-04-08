@@ -33,4 +33,8 @@ jobs:
       - name: Build OCaml
         run: opam exec -- dune build
       - name: Test OCaml
+        if: "!( ${{ startsWith(matrix.os, 'ubuntu-') }} )"
         run: opam exec -- dune runtest
+      - name: Test OCaml including timestamp tests
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        run: opam exec -- env BOX_TIMESTAMP_TESTS=true dune runtest
