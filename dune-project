@@ -27,4 +27,7 @@
   (fmt      (>= 0.8.9))
   (logs     (>= 0.7.0))
   (mdx      (>= 2.0.0))
-  (cmdliner (>= 1.0.4))))
+  ; there are cmdliner 1.0 -> 1.1 deprecations we have ignored using [@@@alert "-deprecated"].
+  ; expect breakage the next big version bump.
+  (cmdliner (<= 1.2.0))
+  ))
