@@ -25,9 +25,9 @@ paths are over the Windows default 260 character pathname limit.
 | Section      | Page                                                                   |
 | ------------ | ---------------------------------------------------------------------- |
 | Usage        | [Add as an Opam Dependency](#add-as-an-opam-dependency)                |
-| Usage        | [Using in Dune rules](#using-in-dune-rules)                            |
 | Usage        | [Using in Dune cram tests](#using-in-dune-cram-tests)                  |
 | Usage        | [Using in Opam build steps](#using-in-opam-build-steps)                |
+| Usage        | [Using in Dune rules](#using-in-dune-rules)                            |
 | Box Commands | [Box Commands](#box-commands)                                          |
 | Box Library  | [Box Library](https://diskuv.github.io/diskuvbox/diskuvbox/index.html) |
 | Contributing | [Your Contributions](CONTRIBUTORS.md)                                  |
@@ -109,6 +109,41 @@ on any platform that Diskuv Box supports!
                   └── f6/
 ```
 
+### Using in Opam `build` steps
+
+FIRST, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
+
+SECOND, if you are sure that you *only* need diskuvbox for Opam build steps,
+change your `.opam` file so it has a `{build}` filter. For example:
+
+```powershell
+depends: [
+  # ...
+  "diskuvbox" {>= "0.1.0" & build}
+]
+```
+
+or in your `dune-project` if you auto-generate your .opam files:
+
+```lisp
+(package
+  ; ...
+  (depends
+    ; ...
+    (diskuvbox (and (>= 0.1.0) :build))
+  )
+)
+```
+
+FINALLY, go ahead and use `diskuvbox` in your .opam build steps like:
+
+```powershell
+build: [
+  # ...
+  ["diskuvbox" "copy-file-into" "assets/icon.png" "assets/public.gpg" "%{_:share}%"]
+]
+```
+
 ### Using in Dune rules
 
 FIRST, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
@@ -163,41 +198,6 @@ rules don't become even more complicated with platform specific hacks:
  (alias runlicense)
  (action
    (diff diskuvbox.mli diskuvbox.corrected.mli)))
-```
-
-### Using in Opam `build` steps
-
-FIRST, make sure you have [Added diskuvbox as an Opam Dependency](#add-as-an-opam-dependency).
-
-SECOND, if you are sure that you *only* need diskuvbox for Opam build steps,
-change your `.opam` file so it has a `{build}` filter. For example:
-
-```powershell
-depends: [
-  # ...
-  "diskuvbox" {>= "0.1.0" & build}
-]
-```
-
-or in your `dune-project` if you auto-generate your .opam files:
-
-```lisp
-(package
-  ; ...
-  (depends
-    ; ...
-    (diskuvbox (and (>= 0.1.0) :build))
-  )
-)
-```
-
-FINALLY, go ahead and use `diskuvbox` in your .opam build steps like:
-
-```powershell
-build: [
-  # ...
-  ["diskuvbox" "copy-file-into" "assets/icon.png" "assets/public.gpg" "%{_:share}%"]
-]
 ```
 
 ## Box commands
