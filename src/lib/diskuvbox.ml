@@ -33,11 +33,11 @@ end)
 let rresult_error_to_string ~err msg = err (Fmt.str "%a" Rresult.R.pp_msg msg)
 
 let map_rresult_error_to_string ~err = function
-  | Ok v -> Result.ok v
-  | Error msg -> Result.error (rresult_error_to_string ~err msg)
+  | Ok v -> Result.Ok v
+  | Error msg -> Result.Error (rresult_error_to_string ~err msg)
 
 let map_string_to_rresult_error = function
-  | Ok v -> Result.ok v
+  | Ok v -> Result.Ok v
   | Error s -> Rresult.R.error_msg s
 
 module type ERROR_HANDLER = sig
@@ -105,10 +105,10 @@ let current_directory ?(err = Fun.id) () =
   map_rresult_error_to_string ~err (OS.Dir.current ())
 
 let absolute_path ?(err = Fun.id) fp =
-  if Fpath.is_abs fp then Result.ok (Fpath.normalize fp)
+  if Fpath.is_abs fp then Result.Ok (Fpath.normalize fp)
   else
     match current_directory ~err () with
-    | Ok pwd -> Result.ok Fpath.(normalize (pwd // fp))
+    | Ok pwd -> Result.Ok Fpath.(normalize (pwd // fp))
     | Error e -> Error e
 
 let walk_down ?(err = Fun.id) ?(max_depth = 0) ~from_path ~f () =
@@ -325,11 +325,11 @@ let copy_dir ?(err = Fun.id) ~src ~dst () =
               ())
     in
     let* folds =
-      OS.Path.fold ~err:raise_fold_error ~dotfiles:true cp (Result.ok ())
+      OS.Path.fold ~err:raise_fold_error ~dotfiles:true cp (Result.Ok ())
         [ src ]
     in
     match folds with
-    | Ok () -> Result.ok ()
+    | Ok () -> Result.Ok ()
     | Error msg ->
         Rresult.R.error_msg
           (Fmt.str
