@@ -174,7 +174,9 @@ let walk_down ?(err = Fun.id) ?(max_depth = 0) ~from_path ~f () =
         else Ok ()
     | false -> Ok ()
   in
-  map_rresult_error_to_string ~err (walk Root from_path Path_attributes.empty 0)
+  map_rresult_error_to_string ~err
+    (let* from_path = OS.Path.must_exist from_path in
+     walk Root from_path Path_attributes.empty 0)
 
 let find_up ?(err = Fun.id) ?(max_ascent = 20) ~from_dir ~basenames () =
   let open Monad_syntax_rresult (struct
@@ -240,7 +242,8 @@ let copy_file ?(err = Fun.id) ?mode ~src ~dst () =
     let box_error = err
   end) in
   map_rresult_error_to_string ~err
-    (let* mode =
+    (let* src = OS.File.must_exist src in
+     let* mode =
        match mode with Some m -> Ok m | None -> OS.Path.Mode.get src
      in
      let* data = OS.File.read src in
@@ -338,6 +341,7 @@ let copy_dir ?(err = Fun.id) ~src ~dst () =
              Fpath.pp src Fpath.pp dst Rresult.R.pp_msg msg)
   in
   map_rresult_error_to_string ~err
-    (let* abs_src = map_string_to_rresult_error (absolute_path src) in
+    (let* src = OS.Dir.must_exist src in
+     let* abs_src = map_string_to_rresult_error (absolute_path src) in
      let* abs_dst = map_string_to_rresult_error (absolute_path dst) in
      do_copy_dir ~src:abs_src ~dst:abs_dst)
