@@ -28,10 +28,8 @@
   (fmt      (>= 0.8.9))
   (logs     (>= 0.7.0))
   (mdx      (>= 2.0.0))
+  (cmdliner (>= 1.0.0))
   ; these are used in src/lib/dune.runlicense.inc
   (headache    (and (>= 1.05)   :build))
   (ocamlformat (and (>= 0.19.0) :build))
-  ; there are cmdliner 1.0 -> 1.1 deprecations we have ignored using [@@@alert "-deprecated"].
-  ; expect breakage the next big version bump.
-  (cmdliner (<= 1.2.0))
   ))
