@@ -18,7 +18,7 @@
  (action
   (with-stdout-to
    %{target}
-   (run sed "s/```console/```sh/g" %{deps}))))
+   (run sed "s/```console/```sh/g; s#[$] diskuvbox#$ ./diskuvbox.exe#g" %{deps}))))
 (rule
  (deps (:in README.md.sh) diskuvbox.exe src/lib/dune.runlicense.inc)
  (target README.md.sh.corrected)
@@ -30,7 +30,7 @@
  (action
   (with-stdout-to
    %{target}
-   (run sed "s/```sh/```console/g" %{deps}))))
+   (run sed "s/```sh/```console/g; s#[$] ./diskuvbox.exe#$ diskuvbox#g" %{deps}))))
 (rule
  (alias runmarkdown)
  (action
