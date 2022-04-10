@@ -12,7 +12,7 @@ creates a complex directory structure.
 
 Use diskuvbox to print the directory tree. It should be reproducible
 on any platform that Diskuv Box supports!
-  $ diskuvbox tree a --max-depth 10 --encoding UTF-8
+  $ ./diskuvbox.exe tree a --max-depth 10 --encoding UTF-8
   a
   ├── b/
   │   ├── c/

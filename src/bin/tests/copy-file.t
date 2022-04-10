@@ -6,8 +6,8 @@ Create a symlink
   $ ln -s m n
 
 Use diskuvbox to copy each one at a time. The destination directory should be autocreated.
-  $ diskuvbox copy-file a dest/1/2/a_copied
-  $ diskuvbox copy-file n dest/1/2/n_copied
+  $ ./diskuvbox.exe copy-file a dest/1/2/a_copied
+  $ ./diskuvbox.exe copy-file n dest/1/2/n_copied
 
 Verify
   $ ls dest/1/2 | sort

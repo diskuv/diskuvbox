@@ -10,11 +10,11 @@ Create a complex directory structure
   $ touch a/b/c/d/z
 
 Use diskuvbox to print the directory tree with depth <= 0
-  $ diskuvbox tree a --max-depth 0
+  $ ./diskuvbox.exe tree a --max-depth 0
   a
 
 Use diskuvbox to print the directory tree with depth <= 2
-  $ diskuvbox tree a --max-depth 2
+  $ ./diskuvbox.exe tree a --max-depth 2
   a
   |-- b/
   |   |-- c/
@@ -24,7 +24,7 @@ Use diskuvbox to print the directory tree with depth <= 2
       `-- c3/
 
 Use diskuvbox to print the directory tree, all of it
-  $ diskuvbox tree a --max-depth 10
+  $ ./diskuvbox.exe tree a --max-depth 10
   a
   |-- b/
   |   |-- c/
@@ -51,7 +51,7 @@ Use diskuvbox to print the directory tree, all of it
                   `-- f6/
 
 Use diskuvbox to print the directory tree, all of it in UTF-8
-  $ diskuvbox tree a --max-depth 10 --encoding UTF-8
+  $ ./diskuvbox.exe tree a --max-depth 10 --encoding UTF-8
   a
   ├── b/
   │   ├── c/
@@ -78,7 +78,7 @@ Use diskuvbox to print the directory tree, all of it in UTF-8
                   └── f6/
 
 Use diskuvbox to print a subtree of the directory tree
-  $ diskuvbox tree a/b --max-depth 10
+  $ ./diskuvbox.exe tree a/b --max-depth 10
   a/b
   |-- c/
   |   |-- d/
