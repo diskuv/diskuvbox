@@ -183,7 +183,7 @@ let find_up ?(err = Fun.id) ?(max_ascent = 20) ~from_dir ~basenames () =
     let box_error = err
   end) in
   let rec validate = function
-    | [] -> Ok []
+    | [] -> Ok ()
     | hd :: tl -> (
         let basename_norm = Fpath.normalize hd in
         match List.length (Fpath.segs basename_norm) with
@@ -214,7 +214,7 @@ let find_up ?(err = Fun.id) ?(max_ascent = 20) ~from_dir ~basenames () =
           else search path tl ascents_remaining
   in
   map_rresult_error_to_string ~err
-    (let* basenames = validate basenames in
+    (let* () = validate basenames in
      let* from_dir = OS.Dir.must_exist from_dir in
      search (Fpath.normalize from_dir)
        (List.map Fpath.normalize basenames)

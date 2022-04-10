@@ -3,9 +3,9 @@ Use diskuvbox to find a nonexistent file
 
 Create a directory structure
   $ install -d a/b/c/d/e/f
-  $ touch a/b/i-am-here
-  $ touch a/b/c/i-am-also-here
-  $ touch a/b/c/d/something-that-wont-be-searched
+  $ diskuvbox touch a/b/i-am-here
+  $ diskuvbox touch a/b/c/i-am-also-here
+  $ diskuvbox touch a/b/c/d/something-that-wont-be-searched
 
 Use diskuvbox to find i-am-here
   $ diskuvbox find-up a/b/c/d/e/f i-am-here
@@ -14,3 +14,14 @@ Use diskuvbox to find i-am-here
 Use diskuvbox to find i-am-here or i-am-also-here
   $ diskuvbox find-up a/b/c/d/e/f i-am-here i-am-also-here
   a/b/c/i-am-also-here
+
+Use diskuvbox to find .you-better-find-me in the same directory
+  $ diskuvbox touch .you-better-find-me
+  $ diskuvbox find-up . .you-better-find-me
+  ./.you-better-find-me
+
+Use diskuvbox to find .and-this-one-too in a child directory
+  $ install -d z
+  $ diskuvbox touch z/.and-this-one-too
+  $ diskuvbox find-up z .and-this-one-too
+  z/.and-this-one-too
