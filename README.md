@@ -207,7 +207,7 @@ rules don't become even more complicated with platform specific hacks:
 > available at https://diskuv.github.io/diskuvbox/diskuvbox/index.html.
 > Just use `opam install diskuvbox` (or `with-dkml opam install diskuvbox` with
 > the Diskuv OCaml Windows distribution) to install Diskuv Box in your existing
-> OCaml project.
+> OCaml project. **Consider the API unstable until version 1.0.**
 
 
 | Command                                     | Description                                                               |
