@@ -1,0 +1,7 @@
+; Only stublib DLLs that are part of a standard OCaml installation should be present below.
+; dllunix and others are always built in official OCaml packages like https://archlinux.org/packages/extra/x86_64/ocaml/files/
+;   (search for usr/lib/ocaml/stublibs/)
+; The authority is OCaml's source code at https://github.com/ocaml/ocaml/tree/trunk/otherlibs
+
+Used DLLs:
+	dllunix

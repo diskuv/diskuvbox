@@ -10,15 +10,18 @@ The single binary design is similar to
 run a command like `diskuvbox copy-file` *or (PENDING) make a symlink from
 `diskuvbox` to `copy-file`*; either way the "copy-file" tooling will be invoked.
 
-All commands meet the following standards:
+`diskuvbox` meet the following standards:
 * Any printed output will be the same on all operating systems *with the default
-options*. For example the file search command [find-up](#diskuvbox-find-up) will
-print files it finds in `a/b/c` format, even on Windows. You will only get
-operating system specific behavior (ex. printing `a\b\c` on Windows) if you
-use options like `--native`. **Feel comfortable using the diskuvbox commands
-in CRAM tests and expect scripts**.
+  options*. For example the file search command [find-up](#diskuvbox-find-up) will
+  print files it finds in `a/b/c` format, even on Windows. You will only get
+  operating system specific behavior (ex. printing `a\b\c` on Windows) if you
+  use options like `--native`. **Feel comfortable using the diskuvbox commands
+  in CRAM tests and expect scripts**.
 * On Windows, any failing command will provide a helpful error message if the
-paths are over the Windows default 260 character pathname limit.
+  paths are over the Windows default 260 character pathname limit.
+* For advanced embedding scenarios, the OCaml bytecode form of `diskuvbox` will
+  only [dynamically load shared libraries](https://ocaml.org/manual/runtime.html#s:ocamlrun-dllpath)
+  that are present in standard OCaml installations: dllunix, dllthreads and dllcamlstr.
 
 **Quick Links**
 

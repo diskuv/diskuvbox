@@ -1,6 +1,7 @@
 (executable
  (name main)
  (public_name diskuvbox)
+ (modes byte exe)
  (libraries diskuvbox cmdliner fmt.cli fmt.tty logs.cli logs.fmt))
 
 (rule
@@ -24,3 +25,19 @@
  (alias runlicense)
  (action
    (diff log_config.ml log_config.corrected.ml)))
+
+; Validate that diskuvbox does not contain stublibs in excess of Stdlib
+(rule
+  (alias runtest)
+  (target diskuvbox.dlls.txt.corrected)
+  (deps (:bc main.bc))
+  (action
+    (progn
+      (with-stdout-to %{target}.info (run ocamlobjinfo %{bc}))
+      (with-stdout-to %{target} (progn
+        (echo "; Only stublib DLLs that are part of a standard OCaml installation should be present below.\n")
+        (echo "; dllunix and others are always built in official OCaml packages like https://archlinux.org/packages/extra/x86_64/ocaml/files/\n")
+        (echo ";   (search for usr/lib/ocaml/stublibs/)\n")
+        (echo "; The authority is OCaml's source code at https://github.com/ocaml/ocaml/tree/trunk/otherlibs\n\n")
+        (run awk "/.*:/ {x=0} /Used DLLs:/{x=1} x==1 {print}" %{target}.info)))
+      (diff diskuvbox.dlls.txt %{target}))))

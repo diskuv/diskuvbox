@@ -1,4 +1,5 @@
 ## Pending
+- Validate and document a bytecode guarantee that only standard stublibs are used
 
 ## 0.1.0
 
