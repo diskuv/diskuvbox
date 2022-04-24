@@ -19,8 +19,8 @@ opam text
 *.patch text eol=lf
 *.sexp text eol=lf
 *.sh text eol=lf
-*.mli text eol=lf
-*.ml text eol=lf
+*.mli text eol=lf linguist-language=OCaml
+*.ml text eol=lf linguist-language=OCaml 
 *.md text eol=lf
 *.opam text eol=lf
 *.opam.template text eol=lf
