@@ -285,13 +285,15 @@ let find_up_cmd =
       $ basenames_t $ path_printer_t),
     Term.info "find-up" ~doc ~exits:Term.default_exits ~man )
 
+let max_depth_opt = "max-depth"
+
 let max_depth_t =
   let doc =
     "Maximum depth to print. A maximum depth of 0 will never print deeper than \
      the name of the starting directory. A maximum depth of 1 will, at most, \
      print the contents of the starting directory. Defaults to 0"
   in
-  Arg.(value & opt int 0 & info [ "d"; "max-depth" ] ~doc)
+  Arg.(value & opt int 0 & info [ "d"; max_depth_opt ] ~doc)
 
 type charsets = Ascii | Utf8
 
@@ -345,7 +347,12 @@ let tree_cmd =
   let man =
     [
       `S Manpage.s_description;
-      `P "Print the directory tree starting at the DIR directory.";
+      `P
+        (Fmt.str
+           "Print the directory tree starting at the DIR directory. By default \
+            only the DIR directory (the first level) is printed. Use --%s to \
+            print deeper"
+           max_depth_opt);
     ]
   in
   let tree (_ : Log_config.t) dir max_depth path_printer { print_char_pairs } =
