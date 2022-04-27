@@ -20,7 +20,7 @@ opam text
 *.sexp text eol=lf
 *.sh text eol=lf
 *.mli text eol=lf linguist-language=OCaml
-*.ml text eol=lf linguist-language=OCaml 
+*.ml text eol=lf linguist-language=OCaml
 *.md text eol=lf
 *.opam text eol=lf
 *.opam.template text eol=lf

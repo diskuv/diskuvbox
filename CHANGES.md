@@ -1,5 +1,6 @@
 ## Pending
 - Validate and document a bytecode guarantee that only standard stublibs are used
+- Distribute binaries with setup-dkml.yml@v0
 
 ## 0.1.0
 
