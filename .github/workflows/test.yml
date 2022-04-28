@@ -38,7 +38,7 @@ jobs:
     name: ${{ matrix.os }}-${{ matrix.ocaml-compiler }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: OCaml ${{ matrix.ocaml-compiler }} with Dune cache
         uses: ocaml/setup-ocaml@v2
