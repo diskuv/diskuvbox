@@ -16,7 +16,7 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: 4.13.x
-          dune-cache: true
+          dune-cache: false # true does not publish pages consistently
       - name: Install Opam dependencies
         run: opam install . --deps-only --with-doc
       - name: Build odoc
