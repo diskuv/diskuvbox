@@ -19,7 +19,9 @@
    In fact, Diskuv OCaml is not even using Cmdliner 1.1. *)
 [@@@alert "-deprecated"]
 
-open Cmdliner
+module Arg = Cmdliner.Arg
+module Manpage = Cmdliner.Manpage
+module Term = Cmdliner.Term
 
 (* Error handling *)
 
