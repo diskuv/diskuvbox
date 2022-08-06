@@ -103,14 +103,19 @@ val touch_file : ?err:box_error -> file:Fpath.t -> unit -> (unit, string) result
 
 val copy_file :
   ?err:box_error ->
+  ?bufsize:int ->
   ?mode:int ->
   src:Fpath.t ->
   dst:Fpath.t ->
   unit ->
   (unit, string) result
-(** [copy_file ?err ?mode ~src ~dst ()] copies the file [src] to the file [dst],
-    creating [dst]'s parent directories as necessary.
+(** [copy_file ?err ?bufsize ?mode ~src ~dst ()] copies the file [src] to the
+    file [dst], creating [dst]'s parent directories as necessary.
     
+    Copying the file is done through a memory buffer of size [bufsize]. The
+    default buffer size is large and may vary version to version. We recommend
+    setting the buffer size explicitly.
+
     If [mode] is specified, the chmod [mode] will be applied to [dst]. Otherwise
     the chmod mode is copied from [src].
     
@@ -118,9 +123,18 @@ val copy_file :
     the identity function {!Fun.id}. *)
 
 val copy_dir :
-  ?err:box_error -> src:Fpath.t -> dst:Fpath.t -> unit -> (unit, string) result
-(** [copy_dir ?err ~src ~dst ()] copies the contents of [src] into [dst],
-      creating [dst] and any parent directories as necessary.
+  ?err:box_error ->
+  ?bufsize:int ->
+  src:Fpath.t ->
+  dst:Fpath.t ->
+  unit ->
+  (unit, string) result
+(** [copy_dir ?err ?bufsize ~src ~dst ()] copies the contents of [src] into [dst],
+    creating [dst] and any parent directories as necessary.
       
-      Any error is passed to [err] if it is specified. The default [err] is
-      the identity function {!Fun.id}. *)
+    Copying the files is done through a memory buffer of size [bufsize]. The
+    default buffer size is large and may vary version to version. We recommend
+    setting the buffer size explicitly.
+
+    Any error is passed to [err] if it is specified. The default [err] is
+    the identity function {!Fun.id}. *)

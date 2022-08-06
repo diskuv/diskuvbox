@@ -83,8 +83,8 @@ let has_windows_path_problem file =
         + dirsep_length + bos_tmp_name_max
         >= windows_max_path)
 
-let write ?mode file content =
-  match OS.File.write ?mode file content with
+let friendly_write_op f file =
+  match f () with
   | Ok v -> Ok v
   | Error m when has_windows_path_problem file ->
       Rresult.R.(
@@ -98,13 +98,35 @@ let write ?mode file content =
               system reported: %a."
              Fpath.pp file windows_max_path pp_msg m))
   | Error msg -> Error msg
-  | exception (Failure msg as ex) ->
-      (* For trouble-shooting. Typically we don't catch Failures!
-         But we just log and re-raise the exception. *)
-      Logs.err (fun l ->
-          l "[write] Got fatal error during write of %a:@ @[  %a@]" Fpath.pp
-            file Fmt.lines msg);
-      raise ex
+
+let friendly_write ?mode file content =
+  friendly_write_op (fun () -> OS.File.write ?mode file content) file
+
+let friendly_copyfile ?mode ?(bufsize = 1_048_576) ~err ~src ~dst () =
+  let open Monad_syntax_rresult (struct
+    let box_error = err
+  end) in
+  let write_file_contents ~output =
+    let rec helper input =
+      match input () with
+      | Some (b, pos, len) ->
+          output (Some (b, pos, len));
+          helper input
+      | None -> ()
+    in
+    let buffer = Bytes.create bufsize in
+    OS.File.with_input ~bytes:buffer src (fun input () -> helper input) ()
+  in
+  (* Copy file using buffered copy *)
+  let* nested_result =
+    friendly_write_op
+      (fun () ->
+        OS.File.with_output ?mode dst
+          (fun output () -> write_file_contents ~output)
+          ())
+      dst
+  in
+  nested_result
 
 (* Public Functions *)
 
@@ -242,9 +264,9 @@ let touch_file ?(err = Fun.id) ~file () =
        (* Modify access and modification times to the current time (0.0). *)
        Ok (Unix.utimes (Fpath.to_string file) 0.0 0.0)
      else (* Write empty file *)
-       write ~mode:0o644 file "")
+       friendly_write ~mode:0o644 file "")
 
-let copy_file ?(err = Fun.id) ?mode ~src ~dst () =
+let copy_file ?(err = Fun.id) ?bufsize ?mode ~src ~dst () =
   let open Monad_syntax_rresult (struct
     let box_error = err
   end) in
@@ -253,15 +275,14 @@ let copy_file ?(err = Fun.id) ?mode ~src ~dst () =
      let* mode =
        match mode with Some m -> Ok m | None -> OS.Path.Mode.get src
      in
-     let* data = OS.File.read src in
      let parent_dst = Fpath.parent dst in
      let* created = OS.Dir.create parent_dst in
      if created then
        Logs.debug (fun l ->
            l "[copy_file] Created directory %a" Fpath.pp parent_dst);
-     OS.File.write ~mode dst data)
+     friendly_copyfile ?bufsize ~mode ~err ~src ~dst ())
 
-let copy_dir ?(err = Fun.id) ~src ~dst () =
+let copy_dir ?(err = Fun.id) ?bufsize ~src ~dst () =
   let open Monad_syntax_rresult (struct
     let box_error = err
   end) in
@@ -304,7 +325,6 @@ let copy_dir ?(err = Fun.id) ~src ~dst () =
               ()
           | false ->
               let* mode = OS.Path.Mode.get src in
-              let* data = OS.File.read src in
               let parent_dst = Fpath.parent dst in
               let* created = OS.Dir.create parent_dst in
               if created then
@@ -331,7 +351,7 @@ let copy_dir ?(err = Fun.id) ~src ~dst () =
                   Ok ())
                 else Ok ()
               in
-              let+ () = write ~mode dst data in
+              let+ () = friendly_copyfile ?bufsize ~err ~mode ~src ~dst () in
               ())
     in
     let* folds =
