@@ -23,5 +23,5 @@ Regression test for 32-bit.
 |   * On 32-bit OCaml, max memory block is 2^22 words = 2^22 * 4 B = 16MB.
 |   * Confer: https://github.com/ocaml/ocaml/blob/f40bc2697234e075eb69294e2e2e19a790de8aba/runtime/caml/mlvalues.h#L159
 |   * Confer: https://ocamlverse.github.io/content/runtime.html
-  $ if command -v truncate >/dev/null 2>/dev/null; then truncate -s 20MB test32bit; else dd if=/dev/zero of=test32bit bs=1024 count=0 seek=20480; fi
+  $ if command -v truncate >/dev/null 2>/dev/null; then truncate -s 20MB test32bit; else dd if=/dev/zero of=test32bit bs=1024 count=0 seek=20480 2>/dev/null; fi
   $ ./diskuvbox.exe copy-file test32bit dest/1/2/test32bit
