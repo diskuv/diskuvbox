@@ -1,6 +1,9 @@
 ## Pending
 - Validate and document a bytecode guarantee that only standard stublibs are used
 - Distribute binaries with setup-dkml.yml@v0
+- Fix Dune build steps so works under cross-compiler
+- Code working with Cmdliner.1.1.1
+- Log problems and reraise for troubleshooting write() calls
 
 ## 0.1.0
 
