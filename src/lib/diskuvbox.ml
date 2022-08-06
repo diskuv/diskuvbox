@@ -98,6 +98,13 @@ let write ?mode file content =
               system reported: %a."
              Fpath.pp file windows_max_path pp_msg m))
   | Error msg -> Error msg
+  | exception (Failure msg as ex) ->
+      (* For trouble-shooting. Typically we don't catch Failures!
+         But we just log and re-raise the exception. *)
+      Logs.err (fun l ->
+          l "[write] Got fatal error during write of %a:@ @[  %a@]" Fpath.pp
+            file Fmt.lines msg);
+      raise ex
 
 (* Public Functions *)
 
