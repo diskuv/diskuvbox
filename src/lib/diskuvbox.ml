@@ -99,7 +99,9 @@ let friendly_write_op f file =
              Fpath.pp file windows_max_path pp_msg m))
   | Error msg -> Error msg
 
-let friendly_write ?mode file content =
+(** Small strings only; maximum string is 16MiB for 32-bit OCaml.
+    Confer: https://ocamlverse.github.io/content/runtime.html  *)
+let friendly_write_small_string ?mode file content =
   friendly_write_op (fun () -> OS.File.write ?mode file content) file
 
 let friendly_copyfile ?mode ?(bufsize = 1_048_576) ~err ~src ~dst () =
@@ -264,7 +266,7 @@ let touch_file ?(err = Fun.id) ~file () =
        (* Modify access and modification times to the current time (0.0). *)
        Ok (Unix.utimes (Fpath.to_string file) 0.0 0.0)
      else (* Write empty file *)
-       friendly_write ~mode:0o644 file "")
+       friendly_write_small_string ~mode:0o644 file "")
 
 let copy_file ?(err = Fun.id) ?bufsize ?mode ~src ~dst () =
   let open Monad_syntax_rresult (struct

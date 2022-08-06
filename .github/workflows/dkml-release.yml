@@ -150,7 +150,7 @@ jobs:
           else
             dd if=/dev/zero of=test32bit bs=1024 count=0 seek=20480
           fi
-          opamrun exec -- diskuvbox copy-file test32bit dest/1/2/test32bit
+          opamrun exec -- env OCAMLRUNPARAM=b diskuvbox copy-file -vv test32bit dest/1/2/test32bit
           rm -f test32bit
 
       - uses: actions/upload-artifact@v3
