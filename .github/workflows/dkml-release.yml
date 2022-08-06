@@ -139,6 +139,20 @@ jobs:
           opamrun exec -- diskuvbox copy-dir _build/install/ _bundle/${{ matrix.dkml-host-abi }} -vv
           tar cvfCz ${{ matrix.abi-pattern }}.tar.gz _bundle/ .
 
+      - name: Quick regression tests
+        run: |
+          #!/bin/sh
+          set -eux
+
+          # https://github.com/diskuv/diskuvbox/issues/1
+          if command -v truncate >/dev/null 2>/dev/null; then
+            truncate -s 20MB test32bit
+          else
+            dd if=/dev/zero of=test32bit bs=1024 count=0 seek=20480
+          fi
+          opamrun exec -- diskuvbox copy-file test32bit dest/1/2/test32bit
+          rm -f test32bit
+
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.abi-pattern }}
