@@ -135,7 +135,7 @@ jobs:
           #     darwin_x86_64/default.darwin_arm64/bin/<binary>
           #   win32-windows_x86.tar.gz:
           #     windows_X86/default/bin/<binary>.exe
-          opamrun install diskuvbox
+          opamrun install ./diskuvbox.opam --yes
           opamrun exec -- diskuvbox copy-dir _build/install/ _bundle/${{ matrix.dkml-host-abi }} -vv
           tar cvfCz ${{ matrix.abi-pattern }}.tar.gz _bundle/ .
 
