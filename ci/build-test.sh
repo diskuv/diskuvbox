@@ -78,8 +78,9 @@ if [ -e "$xswitch/src-ocaml/config.log" ]; then
 fi
 
 # Build
+OPAM_PKGNAME=${OPAM_PACKAGE%.opam}
 opamrun exec -- env
-opamrun install "./${OPAM_PACKAGE}" --with-test --yes
+opamrun install "./${OPAM_PKGNAME}.opam" --with-test --yes
 
 # Quick regression tests
 # https://github.com/diskuv/diskuvbox/issues/1
@@ -94,7 +95,7 @@ rm -f test32bit
 # Copy the installed binary from 'dkml' Opam switch into dist/ folder
 install -d dist/
 ls -l "${opam_root}/dkml/bin"
-install -v "${opam_root}/dkml/bin/${EXECUTABLE_NAME}${suffix_ext}" "dist/${abi_pattern}-${EXECUTABLE_NAME}${suffix_ext}"
+install -v "${opam_root}/dkml/bin/${EXECUTABLE_NAME}${suffix_ext}" "dist/${dkml_host_abi}-${EXECUTABLE_NAME}${suffix_ext}"
 
 # Final Diagnostics
 case "${dkml_host_abi}" in
