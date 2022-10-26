@@ -21,7 +21,7 @@
  (depends
   (odoc     (and (>= 1.5.3) :with-doc))
   ; minimums come from matrix testing in .github/workflows/test.yml
-  (ocaml    (>= 4.09.0))
+  (ocaml    (>= 4.10.0))
   ; all of these may go lower; simply has not been tested
   (ppx_deriving (>= 5.2.1))
   (bos      (>= 0.2.0))
