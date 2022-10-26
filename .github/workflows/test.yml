@@ -15,7 +15,9 @@ jobs:
           - ubuntu-latest
           - macos-latest
         ocaml-compiler:
+          # ---------------
           # Why not 4.08.0?
+          # ---------------
           #
           # It fails on macos: https://github.com/diskuv/diskuvbox/runs/5891371632?check_suite_focus=true
           #
@@ -32,7 +34,27 @@ jobs:
           #        ^^^^^^^^^^^^^^^^^^^^^
           # (cd _build/default && .ppx/0224ad3443a846e54f1637fccb074e7d/ppx.exe --cookie 'library-name="ppx_deriving_create"' -o src_plugins/create/ppx_deriving_create.pp.ml --impl src_plugins/create/ppx_deriving_create.ml -corrected-suffix .ppx-corrected -diff-cmd - -dump-ast)
           # Command got signal KILL.
-          - '4.09.0'
+          #
+          # ---------------
+          # Why not 4.09.0?
+          # ---------------
+          #
+          # It fails on macos: https://github.com/diskuv/diskuvbox/actions/runs/3332746014/jobs/5514449266
+          #
+          #=== ERROR while compiling base.v0.14.3 =======================================#
+          # context     2.1.3 | macos/x86_64 | ocaml-base-compiler.4.09.0 | git+https://github.com/ocaml/opam-repository.git
+          # path        ~/work/diskuvbox/diskuvbox/_opam/.opam-switch/build/base.v0.14.3
+          # command     ~/.opam/opam-init/hooks/sandbox.sh build dune build -p base -j 3
+          # exit-code   1
+          # env-file    ~/.opam/log/base-15853-2d07a0.env
+          # output-file ~/.opam/log/base-15853-2d07a0.out
+          ### output ###
+          # File "compiler-stdlib/src/dune", line 3, characters 0-97:
+          # 3 | (rule (targets caml.ml)
+          # 4 |  (action (run ../gen/gen.exe -ocaml-where %{ocaml_where} -o %{targets})))
+          # (cd _build/default/compiler-stdlib/src && ../gen/gen.exe -ocaml-where /Users/runner/work/diskuvbox/diskuvbox/_opam/lib/ocaml -o caml.ml)
+          # Command got signal KILL.
+          - '4.10.0'
           - '4.13.x'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}-${{ matrix.ocaml-compiler }}

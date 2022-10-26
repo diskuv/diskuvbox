@@ -5,6 +5,7 @@
 - Distribute binaries with setup-dkml.yml@v1
 - Fix Dune build steps so works under cross-compiler
 - Code working with Cmdliner.1.1.1
+- Increase minimum OCaml to 4.10 to work on macOS
 
 ## 0.1.0
 
