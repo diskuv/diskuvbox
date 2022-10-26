@@ -6,3 +6,9 @@ build: [
   ["dune" "build" "-p" name "-j" jobs "@runtest"] {with-test}
   ["dune" "build" "-p" name "-j" jobs "@doc"] {with-doc}
 ]
+pin-depends: [
+  [
+    "dkml-workflows.1.0.0"
+    "git+https://github.com/diskuv/dkml-workflows.git#v1"
+  ]
+]

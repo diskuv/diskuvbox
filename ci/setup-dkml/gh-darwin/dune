@@ -1,0 +1,14 @@
+
+(rule
+(alias gen-dkml)
+(target action.gen.yml)
+(action
+  (setenv
+  OCAMLRUNPARAM
+  b
+  (run %{bin:gh-setup-dkml-action-yml.exe} --output-darwin %{target}))))
+
+(rule
+(alias gen-dkml)
+(action
+  (diff action.yml action.gen.yml)))

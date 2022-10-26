@@ -1,166 +1,90 @@
-# Maintainer note: This .yml file is used as the simple example of setup-dkml.yml@v0. Keep it simple and documented!
+# Maintainer note: This .yml file is used as the simple example of setup-dkml.yml@v1. Keep it simple and documented!
 
 name: Create diskuvbox releases
+
+env:
+  OPAM_PACKAGE: "diskuvbox"
+  EXECUTABLE_NAME: "diskuvbox"
+  DKML_COMPILER: "" # You can override the dkml-compiler package version. Example: 4.12.1-v1.0.2
 
 # Trigger whenever there is a git push to main/master branch, or whenever a version tag is pushed
 on:
   push:
     branches:
       - "main"
-      - "master"
     tags:
       - "[0-9]+.*"
       - "v*"
   # ... or trigger manually from GitHub web interface
   workflow_dispatch:
 
-# Three (3) jobs are needed to use the setup-dkml.yml flow ...
 jobs:
-  # ---------------------------------------
-  # Job 1: Define the `setup-dkml` workflow
-  # ---------------------------------------
-
-  setup-dkml:
-    uses: 'diskuv/dkml-workflows/.github/workflows/setup-dkml.yml@v0'
-    with:
-      ocaml-compiler: 4.12.1
-
-  # -------------------------------------
-  # Job 2: Define a matrix build workflow
-  # -------------------------------------
-
   build:
-    # Wait until `setup-dkml` is finished
-    needs: setup-dkml
-
-    # Five (5) build environments will be available. You can include
-    # all of them or a subset of them.
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: windows-2019
-            abi-pattern: win32-windows_x86
-            dkml-host-abi: windows_x86
-            opam-root: D:/.opam
-            default_shell: msys2 {0}
-            msys2_system: MINGW32
-            msys2_packages: mingw-w64-i686-pkg-config
-          - os: windows-2019
-            abi-pattern: win32-windows_x86_64
-            dkml-host-abi: windows_x86_64
-            opam-root: D:/.opam
-            default_shell: msys2 {0}
-            msys2_system: CLANG64
-            msys2_packages: mingw-w64-clang-x86_64-pkg-config
-          - os: macos-latest
-            abi-pattern: macos-darwin_all
-            dkml-host-abi: darwin_x86_64
-            opam-root: /Users/runner/.opam
-            default_shell: sh
-          - os: ubuntu-latest
-            abi-pattern: manylinux2014-linux_x86
-            dkml-host-abi: linux_x86
-            opam-root: .ci/opamroot
-            default_shell: sh
-          - os: ubuntu-latest
-            abi-pattern: manylinux2014-linux_x86_64
-            dkml-host-abi: linux_x86_64
-            opam-root: .ci/opamroot
-            default_shell: sh
+          - gh_os: windows-2019
+            abi_pattern: win32-windows_x86
+            dkml_host_abi: windows_x86
+          - gh_os: windows-2019
+            abi_pattern: win32-windows_x86_64
+            dkml_host_abi: windows_x86_64
+          - gh_os: ubuntu-latest
+            abi_pattern: manylinux2014-linux_x86
+            dkml_host_abi: linux_x86
+          - gh_os: ubuntu-latest
+            abi_pattern: manylinux2014-linux_x86_64
+            dkml_host_abi: linux_x86_64
+          - gh_os: macos-latest
+            abi_pattern: macos-darwin_all
+            dkml_host_abi: darwin_x86_64
 
-    runs-on: ${{ matrix.os }}
-    name: build-${{ matrix.abi-pattern }}
-
-    # Use a Unix shell by default, even on Windows
-    defaults:
-      run:
-        shell: ${{ matrix.default_shell }}
+    runs-on: ${{ matrix.gh_os }}
+    name: build / ${{ matrix.abi_pattern }}
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install MSYS2 to provide Unix shell (Windows only)
-        if: startsWith(matrix.dkml-host-abi, 'windows')
-        uses: msys2/setup-msys2@v2
+      # The Setup DKML action will create the environment variables:
+      #   opam_root, exe_ext, dkml_host_abi, abi_pattern (and many more)
+
+      - name: Setup DKML on a Windows host
+        if: startsWith(matrix.dkml_host_abi, 'windows_')
+        uses: ./ci/setup-dkml/gh-windows
         with:
-          msystem: ${{ matrix.msys2_system }}
-          update: true
-          install: >-
-            ${{ matrix.msys2_packages }}
-            wget
-            make
-            rsync
-            diffutils
-            patch
-            unzip
-            git
-            tar
+          DKML_COMPILER: ${{ env.DKML_COMPILER }}
 
-      - name: Download setup-dkml artifacts
-        uses: actions/download-artifact@v3
+      - name: Setup DKML on a Darwin host
+        if: startsWith(matrix.dkml_host_abi, 'darwin_')
+        uses: ./ci/setup-dkml/gh-darwin
         with:
-          path: .ci/dist
+          DKML_COMPILER: ${{ env.DKML_COMPILER }}
 
-      - name: Import build environments from setup-dkml
-        run: |
-          ${{ needs.setup-dkml.outputs.import_func }}
-          import ${{ matrix.abi-pattern }}
-
-      - name: Cache Opam downloads by host
-        uses: actions/cache@v3
+      - name: Setup DKML on a Linux host
+        if: startsWith(matrix.dkml_host_abi, 'linux_')
+        uses: ./ci/setup-dkml/gh-linux
         with:
-          path: ${{ matrix.opam-root }}/download-cache
-          key: ${{ matrix.dkml-host-abi }}
+          DKML_COMPILER: ${{ env.DKML_COMPILER }}
 
-      # >>>>>>>>>>>>>
-      # We can customize the next two steps.
-      # But we aren't doing anything fancy, so we leave it as-is.
-      # And you can copy-and-paste this step ... we even do `opamrun install diskuvbox`
-      # for you which is unnecessary inside the diskuvbox project but necessary if you
-      # copy-and-paste this step into your own project.
-      # >>>>>>>>>>>>>
+      - name: Build and test the package on Windows host
+        if: startsWith(matrix.dkml_host_abi, 'windows_')
+        shell: msys2 {0}
+        run: ci/build-test.sh --opam-package ${{ env.OPAM_PACKAGE }} --executable-name ${{ env.EXECUTABLE_NAME }}
 
-      - name: Use opamrun to build your executable
-        run: |
-          #!/bin/sh
-          set -eux
-          opamrun install . --with-test --deps-only --yes
-          opamrun exec -- dune build @install
-
-          # Package up whatever you built. Example contents:
-          #   macos-darwin_all.tar.gz:
-          #     darwin_x86_64/default/bin/<binary>
-          #     darwin_x86_64/default.darwin_arm64/bin/<binary>
-          #   win32-windows_x86.tar.gz:
-          #     windows_X86/default/bin/<binary>.exe
-          opamrun install ./diskuvbox.opam --yes
-          opamrun exec -- diskuvbox copy-dir _build/install/ _bundle/${{ matrix.dkml-host-abi }} -vv
-          tar cvfCz ${{ matrix.abi-pattern }}.tar.gz _bundle/ .
-
-      - name: Quick regression tests
-        run: |
-          #!/bin/sh
-          set -eux
-
-          # https://github.com/diskuv/diskuvbox/issues/1
-          if command -v truncate >/dev/null 2>/dev/null; then
-            truncate -s 20MB test32bit
-          else
-            dd if=/dev/zero of=test32bit bs=1024 count=0 seek=20480
-          fi
-          opamrun exec -- env OCAMLRUNPARAM=b diskuvbox copy-file -vv test32bit dest/1/2/test32bit
-          rm -f test32bit
+      - name: Build and test the package on non-Windows host
+        if: "!startsWith(matrix.dkml_host_abi, 'windows_')"
+        run: ci/build-test.sh --opam-package ${{ env.OPAM_PACKAGE }} --executable-name ${{ env.EXECUTABLE_NAME }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.abi-pattern }}
-          path: ${{ matrix.abi-pattern }}.tar.gz
+          name: ${{ matrix.dkml_host_abi }}
+          path: dist/
 
-  # --------------------------------
-  # Job 3: Define a release workflow
-  # --------------------------------
+  #--------
+  # Release
+  #--------
 
   release:
     runs-on: ubuntu-latest
@@ -170,51 +94,19 @@ jobs:
     needs:
       - build
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - uses: actions/download-artifact@v3
         with:
-          path: by_abi_pattern
+          path: dist
 
-      - name: Remove setup artifacts
-        run: rm -rf setup-*
-        working-directory: by_abi_pattern
-
-      - name: Display files downloaded
-        run: ls -R
-        working-directory: by_abi_pattern
-
-      # >>>>>>>>>>>>>
-      # We can customize the next two steps.
-      # But we aren't doing anything fancy, so we leave it as-is.
-      # >>>>>>>>>>>>>
-
-      - name: Restructure files for distribution
-        # Example transformation, assuming there is no cross-compilation:
-        #   by_abi_pattern/darwin_all.tar.gz     --untar--> by_host_abi/darwin_x86_64/default/bin/<binary>      --move--> dist/darwin_x86_64_<binary>
-        #   by_abi_pattern/windows_x86_64.tar.gz --untar--> by_host_abi/windows_x86_64/default/bin/<binary>.exe --move--> dist/windows_x86_64_<binary>.exe
-        run: |
-          #!/bin/sh
-          set -eufx
-          # <untar>
-          mkdir by_host_abi
-          find by_abi_pattern -mindepth 1 -maxdepth 1 -name d | while read -r abipatterndir; do
-            tar xvfCz "$abipatterndir/$abipatterndir.tar.gz" by_host_abi/
-            rm -rf "$abipatterndir"
-          done
-          # <move>
-          mkdir dist
-          find by_host_abi -mindepth 1 -maxdepth 1 -type d | while read -r hostabidir; do
-            nativearch=$(basename "$hostabidir")
-            if [ -d "$hostabidir/default/bin" ]; then
-              find "$hostabidir/default/bin/" -mindepth 1 -maxdepth 1 | while read -r binarypath; do
-                binary=$(basename "$binarypath")
-                mv -v "$binarypath" "dist/$nativearch_$binary"
-              done
-            fi
-          done
+      - name: Restructure multi-ABI directories
+        run: ci/prepare-release.sh
 
       - name: Release (only when Git tag pushed)
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            dist/*
+            _release/*

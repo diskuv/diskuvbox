@@ -19,6 +19,7 @@ depends: [
   "logs" {>= "0.7.0"}
   "mdx" {>= "2.0.0" & with-test}
   "cmdliner" {>= "1.0.0"}
+  "dkml-workflows" {>= "1.0.0" & build}
   "headache" {>= "1.05" & build}
   "ocamlformat" {>= "0.19.0" & build}
 ]
@@ -30,4 +31,10 @@ build: [
   ["dune" "build" "-p" name "-j" jobs]
   ["dune" "build" "-p" name "-j" jobs "@runtest"] {with-test}
   ["dune" "build" "-p" name "-j" jobs "@doc"] {with-doc}
+]
+pin-depends: [
+  [
+    "dkml-workflows.1.0.0"
+    "git+https://github.com/diskuv/dkml-workflows.git#v1"
+  ]
 ]
