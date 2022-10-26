@@ -6,7 +6,7 @@
   (setenv
   OCAMLRUNPARAM
   b
-  (run %{bin:gh-setup-dkml-action-yml.exe} --output-linux %{target}))))
+  (run gh-setup-dkml-action-yml --output-linux %{target}))))
 
 (rule
 (alias gen-dkml)
