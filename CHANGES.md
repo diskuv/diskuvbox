@@ -2,7 +2,7 @@
 - Use memory buffering to copy files. Removes 16 MiB max file limitation on
   32-bit OCaml.
 - Validate and document a bytecode guarantee that only standard stublibs are used
-- Distribute binaries with setup-dkml.yml@v0
+- Distribute binaries with setup-dkml.yml@v1
 - Fix Dune build steps so works under cross-compiler
 - Code working with Cmdliner.1.1.1
 

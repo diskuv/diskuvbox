@@ -1,0 +1,27 @@
+
+(rule
+(target setup-dkml-windows_x86-gen.ps1)
+(action
+  (setenv
+  OCAMLRUNPARAM
+  b
+  (run %{bin:pc-setup-dkml.exe} --output-windows_x86 %{target}))))
+
+(rule
+(target setup-dkml-windows_x86_64-gen.ps1)
+(action
+  (setenv
+  OCAMLRUNPARAM
+  b
+  (run %{bin:pc-setup-dkml.exe} --output-windows_x86_64 %{target}))))
+
+(rule
+(alias gen-dkml)
+(action
+  (diff setup-dkml-windows_x86.ps1 setup-dkml-windows_x86-gen.ps1)))
+
+(rule
+(alias gen-dkml)
+(action
+  (diff setup-dkml-windows_x86_64.ps1 setup-dkml-windows_x86_64-gen.ps1)))
+  
