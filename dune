@@ -13,29 +13,12 @@
 
 ; BEGIN HACK - Workaround unsupported ```console blocks
 (rule
- (deps README.md)
- (target README.md.sh)
- (action
-  (with-stdout-to
-   %{target}
-   (run sed "s/```console/```sh/g; s#[$] diskuvbox#$ ./diskuvbox.exe#g" %{deps}))))
-(rule
- (deps (:in README.md.sh) diskuvbox.exe src/lib/dune.runlicense.inc)
- (target README.md.sh.corrected)
- (action
-  (run ocaml-mdx test --force-output %{in})))
-(rule
- (deps README.md.sh.corrected)
- (target README.md.corrected)
- (action
-  (with-stdout-to
-   %{target}
-   (run sed "s/```sh/```console/g; s#[$] ./diskuvbox.exe#$ diskuvbox#g" %{deps}))))
-(rule
  (alias runmarkdown)
+ (deps (:in README.md) diskuvbox.exe src/lib/dune.runlicense.inc)
  (action
   (progn
-   (diff README.md README.md.corrected))))
+   (run ./mdx-console.sh %{in})
+   (no-infer (diff README.md README.md.corrected)))))
 ; END HACK
 
 ; Use the following to update the docs ...
