@@ -95,7 +95,7 @@ rm -f test32bit
 # Copy the installed binary from 'dkml' Opam switch into dist/ folder
 install -d dist/
 ls -l "${opam_root}/dkml/bin"
-install -v "${opam_root}/dkml/bin/${EXECUTABLE_NAME}${suffix_ext}" "dist/${abi_pattern}-${EXECUTABLE_NAME}${suffix_ext}"
+install -v "${opam_root}/dkml/bin/${EXECUTABLE_NAME}${suffix_ext}" "dist/${dkml_host_abi}-${EXECUTABLE_NAME}${suffix_ext}"
 
 # Final Diagnostics
 case "${dkml_host_abi}" in
