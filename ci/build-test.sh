@@ -89,6 +89,21 @@ fi
 # Update
 opamrun update
 
+# Define regression tests
+regression_tests() {
+    # https://github.com/diskuv/diskuvbox/issues/1
+    if command -v truncate >/dev/null 2>/dev/null; then
+        truncate -s 20MB test32bit
+    else
+        dd if=/dev/zero of=test32bit bs=1024 count=0 seek=20480
+    fi
+    opamrun exec -- env OCAMLRUNPARAM=b dune exec -- src/bin/main.exe copy-file -vv test32bit dest/1/2/test32bit
+    rm -f test32bit dest/1/2/test32bit
+    rmdir dest/1/2
+    rmdir dest/1
+    rmdir dest
+}
+
 # Configure cross-compiling in Opam
 OPAM_PKGNAME=${OPAM_PACKAGE%.opam}
 #   0. Some host ABIs can cross-compile; set config for those.
@@ -175,10 +190,11 @@ if [ -n "$dunecontext" ]; then
         uutf.1.0.3+dune \
         --deps-only --yes
     
-    # Test
+    # Test on host ABI
     opamrun exec -- dune build -p diskuvbox @runtest
+    regression_tests
 
-    # Cross-compile
+    # Cross-compile to target ABI
     opamrun exec -- dune build -p diskuvbox -x "${toolchain}" _build/default/diskuvbox.install "_build/default.${toolchain}/diskuvbox-${toolchain}.install"
 else
     # If config switches from cross-compiling to host compiling, reset cross-compiling
@@ -186,19 +202,12 @@ else
     opamrun option 'post-install-commands='
 
     # Build
-    opamrun install "./${OPAM_PKGNAME}.opam" --with-test --deps-only --yes
-    opamrun exec -- dune build -p diskuvbox                   _build/default/diskuvbox.install
-fi
+    opamrun install "./${OPAM_PKGNAME}.opam" --deps-only --yes
+    opamrun exec -- dune build -p diskuvbox @runtest          _build/default/diskuvbox.install
 
-# Quick regression tests
-# https://github.com/diskuv/diskuvbox/issues/1
-if command -v truncate >/dev/null 2>/dev/null; then
-    truncate -s 20MB test32bit
-else
-    dd if=/dev/zero of=test32bit bs=1024 count=0 seek=20480
+    # Test
+    regression_tests
 fi
-opamrun exec -- env OCAMLRUNPARAM=b diskuvbox copy-file -vv test32bit dest/1/2/test32bit
-rm -f test32bit
 
 # Prereq: Diagnostics
 case "${dkml_host_abi}" in
