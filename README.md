@@ -6,7 +6,7 @@ binary (`diskuvbox`, or `diskuvbox.exe` on
 Windows) or as an OCaml library with minimal dependencies.
 
 The single binary design is similar to
-[busybox](https://www.busybox.net/downloads/BusyBox.html). You can choose to
+[busybox]. You can choose to
 run a command like `diskuvbox copy-file` *or (PENDING) make a symlink from
 `diskuvbox` to `copy-file`*; either way the "copy-file" tooling will be invoked.
 
@@ -619,3 +619,5 @@ these libraries were created by [Daniel Bünzli](https://erratique.ch/profile).
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [![Box tests](https://github.com/diskuv/diskuvbox/actions/workflows/test.yml/badge.svg)](https://github.com/diskuv/diskuvbox/actions/workflows/test.yml)        |
 | [![Syntax check](https://github.com/diskuv/diskuvbox/actions/workflows/syntax.yml/badge.svg)](https://github.com/diskuv/diskuvbox/actions/workflows/syntax.yml) |
+
+[busybox]: https://en.wikipedia.org/wiki/BusyBox
