@@ -24,13 +24,11 @@ depends: [
   "ocamlformat" {>= "0.19.0" & build}
 ]
 dev-repo: "git+https://github.com/diskuv/diskuvbox.git"
-# Until Dune 3+ the auto-generated 'dune' will have an invalid ["dune" "install" ...] step
+# Until Dune 3+ the auto-generated '.opam' will have an invalid ["dune" "install" ...] step
 # that messes up with cross-compilation. Customized it to remove it.
 build: [
   ["dune" "subst"] {dev}
-  ["dune" "build" "-p" name "-j" jobs]
-  ["dune" "build" "-p" name "-j" jobs "@runtest"] {with-test}
-  ["dune" "build" "-p" name "-j" jobs "@doc"] {with-doc}
+  ["dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} "@doc" {with-doc}]
 ]
 pin-depends: [
   [

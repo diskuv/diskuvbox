@@ -6,6 +6,7 @@ env:
   OPAM_PACKAGE: "diskuvbox"
   EXECUTABLE_NAME: "diskuvbox"
   DKML_COMPILER: "" # You can override the dkml-compiler package version. Example: 4.12.1-v1.0.2
+  CACHE_PREFIX: "v1"
 
 # Trigger whenever there is a git push to main/master branch, or whenever a version tag is pushed
 on:
@@ -47,6 +48,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Cache cross-compilation tools
+        uses: actions/cache@v3
+        with:
+          path: .ci/cross
+          key:
+            "${{ runner.os }}-cross-${{ hashFiles('ci/*.sh') }}"
+
       # The Setup DKML action will create the environment variables:
       #   opam_root, exe_ext, dkml_host_abi, abi_pattern (and many more)
 
@@ -55,18 +63,21 @@ jobs:
         uses: ./ci/setup-dkml/gh-windows
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
+          CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
 
       - name: Setup DKML on a Darwin host
         if: startsWith(matrix.dkml_host_abi, 'darwin_')
         uses: ./ci/setup-dkml/gh-darwin
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
+          CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
 
       - name: Setup DKML on a Linux host
         if: startsWith(matrix.dkml_host_abi, 'linux_')
         uses: ./ci/setup-dkml/gh-linux
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
+          CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
 
       - name: Build and test the package on Windows host
         if: startsWith(matrix.dkml_host_abi, 'windows_')
