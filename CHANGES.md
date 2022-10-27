@@ -6,6 +6,7 @@
 - Fix Dune build steps so works under cross-compiler
 - Code working with Cmdliner.1.1.1
 - Increase minimum OCaml to 4.10 to work on macOS
+- Cross-compile `darwin_arm64` on `darwin_x86_64`
 
 ## 0.1.0
 

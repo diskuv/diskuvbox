@@ -13,3 +13,7 @@ _build/
 
 #   direnv (https://direnv.net/)
 .envrc
+
+# CI
+.ci/
+dist/
