@@ -86,6 +86,9 @@ if [ -e "$xswitch/src-ocaml/config.log" ]; then
     echo '--- END src-ocaml/config.log ---' >&2
 fi
 
+# Update
+opamrun update
+
 # Configure cross-compiling in Opam
 OPAM_PKGNAME=${OPAM_PACKAGE%.opam}
 #   0. Some host ABIs can cross-compile; set config for those.
