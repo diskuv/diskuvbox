@@ -20,7 +20,9 @@ on:
       - "v*"
   # ... or trigger manually from GitHub web interface
   workflow_dispatch:
-
+  # ... or prime the caches every Wednesday at 18:00 UTC
+  schedule:
+    - cron: 0 18 * * WED
 jobs:
   build:
     strategy:

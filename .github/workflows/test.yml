@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - 'main'
+    tags:
+      - "[0-9]+.*"
+      - "v*"
+  # ... or trigger manually from GitHub web interface
+  workflow_dispatch:
+  # ... or prime the caches every Wednesday at 18:00 UTC
+  schedule:
+    - cron: 0 18 * * WED
 
 jobs:
   build:
@@ -74,6 +82,7 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           dune-cache: false
+          cache-prefix: v2
       - name: Install Opam dependencies
         run: opam install . --deps-only --with-test
       - name: Build OCaml
