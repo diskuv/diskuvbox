@@ -7,6 +7,8 @@ env:
   EXECUTABLE_NAME: "diskuvbox"
   DKML_COMPILER: "" # You can override the dkml-compiler package version. Example: 4.12.1-v1.0.2
   CACHE_PREFIX: "v1"
+  # Secondary switch 'two' used to install opam-installer for Dune-ified crosscompiling builds
+  SECONDARY_SWITCH: "true"
 
 # Trigger whenever there is a git push to main/master branch, or whenever a version tag is pushed
 on:
@@ -64,6 +66,7 @@ jobs:
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
           CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
+          SECONDARY_SWITCH: ${{ env.SECONDARY_SWITCH }}
 
       - name: Setup DKML on a Darwin host
         if: startsWith(matrix.dkml_host_abi, 'darwin_')
@@ -71,6 +74,7 @@ jobs:
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
           CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
+          SECONDARY_SWITCH: ${{ env.SECONDARY_SWITCH }}
 
       - name: Setup DKML on a Linux host
         if: startsWith(matrix.dkml_host_abi, 'linux_')
@@ -78,6 +82,7 @@ jobs:
         with:
           DKML_COMPILER: ${{ env.DKML_COMPILER }}
           CACHE_PREFIX: ${{ env.CACHE_PREFIX }}
+          SECONDARY_SWITCH: ${{ env.SECONDARY_SWITCH }}
 
       - name: Build and test the package on Windows host
         if: startsWith(matrix.dkml_host_abi, 'windows_')

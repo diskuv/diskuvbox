@@ -72,19 +72,10 @@ fi
 
 # Initial Diagnostics
 opamrun switch
-opamrun list
+opamrun list --switch dkml
 opamrun var
 opamrun config report
-opamrun exec -- ocamlc -config
-xswitch=$(opamrun var switch)
-if [ -x /usr/bin/cypgath ]; then
-    xswitch=$(/usr/bin/cygpath -au "$xswitch")
-fi
-if [ -e "$xswitch/src-ocaml/config.log" ]; then
-    echo '--- BEGIN src-ocaml/config.log ---' >&2
-    cat "$xswitch/src-ocaml/config.log" >&2
-    echo '--- END src-ocaml/config.log ---' >&2
-fi
+opamrun exec --switch dkml -- ocamlc -config
 
 # Update
 opamrun update
@@ -97,7 +88,7 @@ regression_tests() {
     else
         dd if=/dev/zero of=test32bit bs=1024 count=0 seek=20480
     fi
-    opamrun exec -- env OCAMLRUNPARAM=b dune exec -- src/bin/main.exe copy-file -vv test32bit dest/1/2/test32bit
+    opamrun exec --switch dkml -- env OCAMLRUNPARAM=b dune exec -- src/bin/main.exe copy-file -vv test32bit dest/1/2/test32bit
     rm -f test32bit dest/1/2/test32bit
     rmdir dest/1/2
     rmdir dest/1
@@ -116,24 +107,21 @@ darwin_x86_64)
     toolchain=''
 esac
 if [ -n "$dunecontext" ]; then
-    #   1. Get a copy of opam-installer. We'll just need the binary.
+    #   1. Get a copy of opam-installer from the 'two' secondary switch. We'll just need the binary.
     if [ ! -x .ci/cross/opam-installer ] && [ ! -x .ci/cross/opam-installer.exe ]; then
         install -d .ci/cross
-        opamrun list
-        opamrun install opam-installer --yes
-        opaminstaller="${opam_root}/dkml/bin/opam-installer"
+        opamrun list --switch two
+        opamrun install opam-installer --switch two --yes
+        opaminstaller="${opam_root}/two/bin/opam-installer"
         if [ -x "$opaminstaller.exe" ]; then
             install "$opaminstaller.exe" .ci/cross/opam-installer.exe
         else
             install "$opaminstaller" .ci/cross/opam-installer
         fi
-        # Any transitive packages should be removed since the switch has not been configured
-        # for cross-compiling yet. They will only be compiled for the host ABI.
-        opamrun remove cmdliner cppo ocamlgraph opam-file-format re seq stdlib-shims --yes
     fi
     #   2. Use Dune-ified packages so can cross-compile (same principle underneath Opam monorepo).
     #      Opam monorepo doesn't work yet for dkml-base-compiler.
-    opamrun repository add dune-universe git+https://github.com/dune-universe/opam-overlays.git
+    opamrun repository --switch dkml add dune-universe git+https://github.com/dune-universe/opam-overlays.git
     #   3. Set pre-build-commands so that each Opam package has a correct dune-workspace when
     #      cross-compiling.
     option_args=$(printf 'pre-build-commands=["%s" "%s" "%s" "%s"]' \
@@ -141,7 +129,7 @@ if [ -n "$dunecontext" ]; then
                 '%{name}%' \
                 '%{_:build}%/dune-workspace' \
                 "$dunecontext")
-    opamrun option "$option_args"
+    opamrun option --switch dkml "$option_args"
     #   4. Each Opam package must install its cross-compiled libraries into Opam switch
     option_args=$(printf 'post-install-commands=["%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s" "%s"]' \
         "$HERE_MIXED/crosscompiling-opam-installer.sh" \
@@ -153,24 +141,24 @@ if [ -n "$dunecontext" ]; then
         "%{prefix}%" \
         "%{stublibs}%" \
         "%{toplevel}%")
-    opamrun option "$option_args"
+    opamrun option --switch dkml "$option_args"
 
     #   Pin to the Dune-ified packages. Technically most of these are unnecessary
     #   because they will be repeated in `opamrun install` but some are
     #   required to remove DKML's standard MSVC pins
-    opamrun pin astring -k version 0.8.5+dune --no-action --yes
-    opamrun pin base-bytes -k version base --no-action --yes
-    opamrun pin bos -k version 0.2.1+dune --no-action --yes
-    opamrun pin cmdliner -k version 1.1.1+dune --no-action --yes
-    opamrun pin fmt -k version 0.9.0+dune --no-action --yes
-    opamrun pin fpath -k version 0.7.3+dune --no-action --yes
-    opamrun pin logs -k version 0.7.0+dune2 --no-action --yes
-    opamrun pin ptime -k version 1.0.0+dune2  --no-action --yes
-    opamrun pin rresult -k version 0.7.0+dune  --no-action --yes
-    opamrun pin seq -k version base+dune  --no-action --yes
-    opamrun pin uucp -k version 14.0.0+dune  --no-action --yes
-    opamrun pin uuseg -k version 14.0.0+dune  --no-action --yes
-    opamrun pin uutf -k version 1.0.3+dune  --no-action --yes
+    opamrun pin astring --switch dkml -k version 0.8.5+dune --no-action --yes
+    opamrun pin base-bytes --switch dkml -k version base --no-action --yes
+    opamrun pin bos --switch dkml -k version 0.2.1+dune --no-action --yes
+    opamrun pin cmdliner --switch dkml -k version 1.1.1+dune --no-action --yes
+    opamrun pin fmt --switch dkml -k version 0.9.0+dune --no-action --yes
+    opamrun pin fpath --switch dkml -k version 0.7.3+dune --no-action --yes
+    opamrun pin logs --switch dkml -k version 0.7.0+dune2 --no-action --yes
+    opamrun pin ptime --switch dkml -k version 1.0.0+dune2  --no-action --yes
+    opamrun pin rresult --switch dkml -k version 0.7.0+dune  --no-action --yes
+    opamrun pin seq --switch dkml -k version base+dune  --no-action --yes
+    opamrun pin uucp --switch dkml -k version 14.0.0+dune  --no-action --yes
+    opamrun pin uuseg --switch dkml -k version 14.0.0+dune  --no-action --yes
+    opamrun pin uutf --switch dkml -k version 1.0.3+dune  --no-action --yes
     #   * no --with-test since likely can't run cross-compiled
     #     architecture without an emulator
     opamrun install \
@@ -188,22 +176,22 @@ if [ -n "$dunecontext" ]; then
         uucp.14.0.0+dune \
         uuseg.14.0.0+dune \
         uutf.1.0.3+dune \
-        --deps-only --yes
+        --switch dkml --deps-only --yes
     
     # Test on host ABI
-    opamrun exec -- dune build -p diskuvbox @runtest
+    opamrun exec --switch dkml -- dune build -p diskuvbox @runtest
     regression_tests
 
     # Cross-compile to target ABI
-    opamrun exec -- dune build -p diskuvbox -x "${toolchain}" _build/default/diskuvbox.install "_build/default.${toolchain}/diskuvbox-${toolchain}.install"
+    opamrun exec --switch dkml -- dune build -p diskuvbox -x "${toolchain}" _build/default/diskuvbox.install "_build/default.${toolchain}/diskuvbox-${toolchain}.install"
 else
     # If config switches from cross-compiling to host compiling, reset cross-compiling
-    opamrun option 'pre-build-commands='
-    opamrun option 'post-install-commands='
+    opamrun option --switch dkml 'pre-build-commands='
+    opamrun option --switch dkml 'post-install-commands='
 
     # Build
-    opamrun install "./${OPAM_PKGNAME}.opam" --deps-only --yes
-    opamrun exec -- dune build -p diskuvbox @runtest          _build/default/diskuvbox.install
+    opamrun install "./${OPAM_PKGNAME}.opam" --switch dkml --deps-only --yes
+    opamrun exec --switch dkml -- dune build -p diskuvbox @runtest          _build/default/diskuvbox.install
 
     # Test
     regression_tests
