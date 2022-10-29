@@ -1,10 +1,90 @@
 # setup-dkml
 #   Short form: sd4
   
+<#
+.SYNOPSIS
+
+Setup Diskuv OCaml (DKML) compiler on a desktop PC.
+
+.DESCRIPTION
+
+Setup Diskuv OCaml (DKML) compiler on a desktop PC.
+
+.PARAMETER PC_PROJECT_DIR
+Context variable for the project directory. Defaults to the current directory.
+
+.PARAMETER FDOPEN_OPAMEXE_BOOTSTRAP
+Input variable.
+
+.PARAMETER CACHE_PREFIX
+Input variable.
+
+.PARAMETER OCAML_COMPILER
+Input variable. -DKML_COMPILER takes priority. If -DKML_COMPILER is not set and -OCAML_COMPILER is set, then the specified OCaml version tag of dkml-compiler (ex. 4.12.1) is used.
+
+.PARAMETER DKML_COMPILER
+Input variable. Unspecified or blank is the latest from the default branch (main) of dkml-compiler. @repository@ is the latest from Opam.
+
+.PARAMETER SECONDARY_SWITCH
+Input variable. If true then the secondary switch named 'two' is created, in addition to the always-present 'dkml' switch. 
+
+.PARAMETER CONF_DKML_CROSS_TOOLCHAIN
+Input variable. Unspecified or blank is the latest from the default branch (main) of conf-dkml-cross-toolchain. @repository@ is the latest from Opam.
+
+.PARAMETER DISKUV_OPAM_REPOSITORY
+Input variable. Defaults to the value of -DEFAULT_DISKUV_OPAM_REPOSITORY_TAG (see below)
+
+# autogen from global_env_vars.
+.PARAMETER DEFAULT_DKML_COMPILER
+Environment variable.
+
+.PARAMETER PIN_BASE
+Environment variable.
+
+.PARAMETER PIN_BIGSTRINGAF
+Environment variable.
+
+.PARAMETER PIN_CORE_KERNEL
+Environment variable.
+
+.PARAMETER PIN_CTYPES_FOREIGN
+Environment variable.
+
+.PARAMETER PIN_CTYPES
+Environment variable.
+
+.PARAMETER PIN_CURLY
+Environment variable.
+
+.PARAMETER PIN_DIGESTIF
+Environment variable.
+
+.PARAMETER PIN_DUNE
+Environment variable.
+
+.PARAMETER PIN_OCAMLBUILD
+Environment variable.
+
+.PARAMETER PIN_OCAMLFIND
+Environment variable.
+
+.PARAMETER PIN_OCP_INDENT
+Environment variable.
+
+.PARAMETER PIN_PPX_EXPECT
+Environment variable.
+
+.PARAMETER PIN_PTIME
+Environment variable.
+
+.PARAMETER PIN_TIME_NOW
+Environment variable.
+
+#>
 [CmdletBinding()]
 param (
   # Context variables
-  [Parameter()]
+  [Parameter(HelpMessage='Defaults to the current directory')]
   [string]
   $PC_PROJECT_DIR = $PWD,
   
@@ -20,13 +100,16 @@ param (
   $OCAML_COMPILER = "",
   [Parameter()]
   [string]
-  $DKML_COMPILER = "", # "@repository@" = Opam ; "" = latest from default branch ("main") of git clone
+  $DKML_COMPILER = "",
   [Parameter()]
   [string]
-  $CONF_DKML_CROSS_TOOLCHAIN = "@repository@", # "@repository@" = Opam ; "" = latest from default branch of git clone
+  $SECONDARY_SWITCH = "false",
   [Parameter()]
   [string]
-  $DISKUV_OPAM_REPOSITORY = "" # DEFAULT_DISKUV_OPAM_REPOSITORY_TAG is used as default for empty strings
+  $CONF_DKML_CROSS_TOOLCHAIN = "@repository@",
+  [Parameter()]
+  [string]
+  $DISKUV_OPAM_REPOSITORY = ""
 
   # Conflicts with automatic variable $Verbose
   # [Parameter()]
@@ -35,24 +118,32 @@ param (
     
   # Environment variables (can be overridden on command line)
   # autogen from global_env_vars.
-    ,[Parameter()] [string] $DEFAULT_DKML_COMPILER = "4.12.1-v1.0.2"
-    ,[Parameter()] [string] $PIN_BASE = "v0.14.3"
-    ,[Parameter()] [string] $PIN_BIGSTRINGAF = "0.8.0"
-    ,[Parameter()] [string] $PIN_CORE_KERNEL = "v0.14.2"
-    ,[Parameter()] [string] $PIN_CTYPES_FOREIGN = "0.19.2-windowssupport-r4"
-    ,[Parameter()] [string] $PIN_CTYPES = "0.19.2-windowssupport-r4"
-    ,[Parameter()] [string] $PIN_CURLY = "0.2.1-windows-env_r2"
-    ,[Parameter()] [string] $PIN_DIGESTIF = "1.0.1"
-    ,[Parameter()] [string] $PIN_DUNE = "2.9.3"
-    ,[Parameter()] [string] $PIN_OCAMLBUILD = "0.14.0"
-    ,[Parameter()] [string] $PIN_OCAMLFIND = "1.9.1"
-    ,[Parameter()] [string] $PIN_OCP_INDENT = "1.8.2-windowssupport"
-    ,[Parameter()] [string] $PIN_PPX_EXPECT = "v0.14.1"
-    ,[Parameter()] [string] $PIN_PTIME = "0.8.6-msvcsupport"
-    ,[Parameter()] [string] $PIN_TIME_NOW = "v0.14.0"
+  ,[Parameter()] [string] $DEFAULT_DKML_COMPILER = "4.12.1-v1.0.2"
+  ,[Parameter()] [string] $PIN_BASE = "v0.14.3"
+  ,[Parameter()] [string] $PIN_BIGSTRINGAF = "0.8.0"
+  ,[Parameter()] [string] $PIN_CORE_KERNEL = "v0.14.2"
+  ,[Parameter()] [string] $PIN_CTYPES_FOREIGN = "0.19.2-windowssupport-r4"
+  ,[Parameter()] [string] $PIN_CTYPES = "0.19.2-windowssupport-r4"
+  ,[Parameter()] [string] $PIN_CURLY = "0.2.1-windows-env_r2"
+  ,[Parameter()] [string] $PIN_DIGESTIF = "1.0.1"
+  ,[Parameter()] [string] $PIN_DUNE = "2.9.3"
+  ,[Parameter()] [string] $PIN_OCAMLBUILD = "0.14.0"
+  ,[Parameter()] [string] $PIN_OCAMLFIND = "1.9.1"
+  ,[Parameter()] [string] $PIN_OCP_INDENT = "1.8.2-windowssupport"
+  ,[Parameter()] [string] $PIN_PPX_EXPECT = "v0.14.1"
+  ,[Parameter()] [string] $PIN_PTIME = "0.8.6-msvcsupport"
+  ,[Parameter()] [string] $PIN_TIME_NOW = "v0.14.0"
 )
 
 $ErrorActionPreference = "Stop"
+
+# Reset environment so no conflicts with a parent Opam or OCaml system
+if (Test-Path Env:OPAMROOT)             { Remove-Item Env:OPAMROOT }
+if (Test-Path Env:OPAMSWITCH)           { Remove-Item Env:OPAMSWITCH }
+if (Test-Path Env:OPAM_SWITCH_PREFIX)   { Remove-Item Env:OPAM_SWITCH_PREFIX }
+if (Test-Path Env:CAML_LD_LIBRARY_PATH) { Remove-Item Env:CAML_LD_LIBRARY_PATH }
+if (Test-Path Env:OCAMLLIB)             { Remove-Item Env:OCAMLLIB }
+if (Test-Path Env:OCAML_TOPLEVEL_PATH)  { Remove-Item Env:OCAML_TOPLEVEL_PATH }
 
 # Pushdown context variables
 $env:PC_CI = 'true'
@@ -396,6 +487,7 @@ DISKUV_OPAM_REPOSITORY=${DISKUV_OPAM_REPOSITORY:-}
 DKML_COMPILER=${DKML_COMPILER:-}
 OCAML_COMPILER=${OCAML_COMPILER:-}
 CONF_DKML_CROSS_TOOLCHAIN=${CONF_DKML_CROSS_TOOLCHAIN:-}
+SECONDARY_SWITCH=${SECONDARY_SWITCH:-}
 VERBOSE=${VERBOSE:-}
 .
 -------------------
@@ -713,6 +805,13 @@ export OPAMROOTISOK=1
 if [ "${PATCH_OS_DISTRIBUTION_WIN32}" = true ]; then export OPAMVAR_os_distribution=win32; fi
 if [ "${PATCH_EXE_WIN32}" = true ]; then export OPAMVAR_exe=.exe; fi
 
+# Reset environment so no conflicts with a parent Opam or OCaml system
+unset OPAM_SWITCH_PREFIX
+unset OPAMSWITCH
+unset CAML_LD_LIBRARY_PATH
+unset OCAMLLIB
+unset OCAML_TOPLEVEL_PATH
+
 echo "Running inside Docker container: \$*" >&2
 set +e
 "\$@"
@@ -793,6 +892,13 @@ export OPAMROOT='${opam_root}'
 export OPAMROOTISOK=1
 if [ "${PATCH_OS_DISTRIBUTION_WIN32}" = true ]; then export OPAMVAR_os_distribution=win32; fi
 if [ "${PATCH_EXE_WIN32}" = true ]; then export OPAMVAR_exe=.exe; fi
+
+# Reset environment so no conflicts with a parent Opam or OCaml system
+unset OPAM_SWITCH_PREFIX
+unset OPAMSWITCH
+unset CAML_LD_LIBRARY_PATH
+unset OCAMLLIB
+unset OCAML_TOPLEVEL_PATH
 
 echo "Running: \$*" >&2
 set +e
@@ -942,40 +1048,58 @@ opamrun repository set-url diskuv "git+https://github.com/diskuv/diskuv-opam-rep
 opamrun update default diskuv
 section_end opam-repo
 
-section_begin switch-create "Create Opam switch"
-# Create, or recreate, the Opam switch. The Opam switch should not be
-# cached except for the compiler (confer docs for setup-ocaml GitHub
-# Action) which is the 'dkml' switch
-# Check if the switch name is present in the Opam root (which may come from cache)
-NOMINALLY_PRESENT=false
-if opamrun switch list --short | grep '^dkml$'; then NOMINALLY_PRESENT=true; fi
+do_switch_create() {
+    do_switch_create_NAME=$1
+    shift
 
-# Check if the switch is actually present in case of cache incoherence
-# or corrupt Opam state that could result in:
-#   Error:  No config file found for switch dkml. Switch broken?
-if [ $NOMINALLY_PRESENT = true ] && [ ! -e "$opam_root/dkml/.opam-switch/switch-config" ]; then
-    # Remove the switch name from Opam root, and any partial switch state.
-    # Ignore inevitable warnings/failure about missing switch.
-    opamrun switch remove dkml --yes || true
-    rm -rf "$opam_root/dkml"
+    section_begin "switch-create-$do_switch_create_NAME" "Create Opam switch $do_switch_create_NAME"
+    # Create, or recreate, the Opam switch. The Opam switch should not be
+    # cached except for the compiler (confer docs for setup-ocaml GitHub
+    # Action) which is the 'dkml' switch (or the 'two' switch).
+    # Check if the switch name is present in the Opam root (which may come from cache)
     NOMINALLY_PRESENT=false
-fi
+    if opamrun switch list --short | grep "^${do_switch_create_NAME}\$"; then NOMINALLY_PRESENT=true; fi
 
-if [ $NOMINALLY_PRESENT = false ]; then
-    opamrun switch create dkml --repos diskuv,default --empty --yes
+    # Check if the switch is actually present in case of cache incoherence
+    # or corrupt Opam state that could result in:
+    #   Error:  No config file found for switch dkml. Switch broken?
+    if [ $NOMINALLY_PRESENT = true ] && [ ! -e "$opam_root/$do_switch_create_NAME/.opam-switch/switch-config" ]; then
+        # Remove the switch name from Opam root, and any partial switch state.
+        # Ignore inevitable warnings/failure about missing switch.
+        opamrun switch remove "$do_switch_create_NAME" --yes || true
+        rm -rf "${opam_root:?}/$do_switch_create_NAME"
+        NOMINALLY_PRESENT=false
+    fi
+
+    if [ $NOMINALLY_PRESENT = false ]; then
+        opamrun switch create "$do_switch_create_NAME" --repos diskuv,default --empty --yes
+    fi
+    section_end "switch-create-$do_switch_create_NAME"
+}
+do_switch_create dkml
+if [ "${SECONDARY_SWITCH:-}" = "true" ]; then
+    do_switch_create two
+else
+    # Always create a secondary switch ... just empty. Avoid problems with cache content missing
+    # and idempotency.
+    opamrun switch remove two --yes || true
+    rm -rf "$opam_root/two"
+    opamrun switch create two --empty --yes
 fi
-section_end switch-create
 
 do_pins() {
+    do_pins_NAME=$1
+    shift
+
     # dkml-base-compiler
 
     if [ "${DKML_COMPILER:-}" != '@repository@' ] && [ -z "${DKML_COMPILER:-}" ] && [ -z "${OCAML_COMPILER:-}" ]; then
-        section_begin checkout-dkml-base-compiler "Pin dkml-base-compiler to default ${DEFAULT_DKML_COMPILER} (neither dkml-base-compiler nor OCAML_COMPILER specified)"
-        opamrun pin add --yes --no-action dkml-base-compiler "https://github.com/diskuv/dkml-compiler.git#${DEFAULT_DKML_COMPILER}"
+        section_begin checkout-dkml-base-compiler "Pin dkml-base-compiler to default ${DEFAULT_DKML_COMPILER} (neither dkml-base-compiler nor OCAML_COMPILER specified) for $do_pins_NAME switch"
+        opamrun pin add --switch "$do_pins_NAME" --yes --no-action dkml-base-compiler "https://github.com/diskuv/dkml-compiler.git#${DEFAULT_DKML_COMPILER}"
         section_end checkout-dkml-base-compiler
     elif [ "${DKML_COMPILER:-}" != '@repository@' ] && [ -n "${DKML_COMPILER:-}" ] && [ -z "${OCAML_COMPILER:-}" ]; then
-        section_begin checkout-dkml-base-compiler "Pin dkml-base-compiler to $DKML_COMPILER (dkml-base-compiler specified; no OCAML_COMPILER specified)"
-        opamrun pin add --yes --no-action dkml-base-compiler "https://github.com/diskuv/dkml-compiler.git#${DKML_COMPILER}"
+        section_begin checkout-dkml-base-compiler "Pin dkml-base-compiler to $DKML_COMPILER (dkml-base-compiler specified; no OCAML_COMPILER specified) for $do_pins_NAME switch"
+        opamrun pin add --switch "$do_pins_NAME" --yes --no-action dkml-base-compiler "https://github.com/diskuv/dkml-compiler.git#${DKML_COMPILER}"
         section_end checkout-dkml-base-compiler
     elif [ -n "${OCAML_COMPILER:-}" ]; then
         # Validate OCAML_COMPILER (OCAML_COMPILER specified)
@@ -987,16 +1111,16 @@ do_pins() {
             ;;
         esac
 
-        section_begin checkoutdkml-base-compiler 'Pin dkml-base-compiler (OCAML_COMPILER specified)'
-        opamrun pin add --yes --no-action dkml-base-compiler "https://github.com/diskuv/dkml-compiler.git#${OCAML_COMPILER}-v${DKML_VERSION}"
+        section_begin checkout-dkml-base-compiler "Pin dkml-base-compiler (OCAML_COMPILER specified) for $do_pins_NAME switch"
+        opamrun pin add --switch "$do_pins_NAME" --yes --no-action dkml-base-compiler "https://github.com/diskuv/dkml-compiler.git#${OCAML_COMPILER}-v${DKML_VERSION}"
         section_end checkout-dkml-base-compiler
     fi
 
     # conf-dkml-cross-toolchain
 
     if [ "${CONF_DKML_CROSS_TOOLCHAIN:-}" != '@repository@' ]; then
-        section_begin checkout-conf-dkml-cross-toolchain 'Pin conf-dkml-cross-toolchain'
-        opamrun pin add --yes --no-action conf-dkml-cross-toolchain "https://github.com/diskuv/conf-dkml-cross-toolchain.git#$CONF_DKML_CROSS_TOOLCHAIN"
+        section_begin checkout-conf-dkml-cross-toolchain "Pin conf-dkml-cross-toolchain for $do_pins_NAME switch"
+        opamrun pin add --switch "$do_pins_NAME" --yes --no-action conf-dkml-cross-toolchain "https://github.com/diskuv/conf-dkml-cross-toolchain.git#$CONF_DKML_CROSS_TOOLCHAIN"
         section_end checkout-conf-dkml-cross-toolchain
     fi
 
@@ -1030,31 +1154,36 @@ do_pins() {
     #
     # - ppx_expect; only patch is for v0.14.1. Need to upstream fix the problem.
     # - base; patches for v0.14.1/2/3. Need to upstream fix the problem.
-    opamrun pin add --yes --no-action -k version base "${PIN_BASE}"
-    opamrun pin add --yes --no-action -k version bigstringaf "${PIN_BIGSTRINGAF}"
-    opamrun pin add --yes --no-action -k version core_kernel "${PIN_CORE_KERNEL}"
-    opamrun pin add --yes --no-action -k version ctypes "${PIN_CTYPES}"
-    opamrun pin add --yes --no-action -k version ctypes-foreign "${PIN_CTYPES_FOREIGN}"
-    opamrun pin add --yes --no-action -k version curly "${PIN_CURLY}"
-    opamrun pin add --yes --no-action -k version digestif "${PIN_DIGESTIF}"
-    opamrun pin add --yes --no-action -k version dune "${PIN_DUNE}"
-    opamrun pin add --yes --no-action -k version dune-configurator "${PIN_DUNE}"
-    opamrun pin add --yes --no-action -k version ocamlbuild "${PIN_OCAMLBUILD}"
-    opamrun pin add --yes --no-action -k version ocamlfind "${PIN_OCAMLFIND}"
-    opamrun pin add --yes --no-action -k version ocp-indent "${PIN_OCP_INDENT}"
-    opamrun pin add --yes --no-action -k version ppx_expect "${PIN_PPX_EXPECT}"
-    opamrun pin add --yes --no-action -k version ptime "${PIN_PTIME}"
-    opamrun pin add --yes --no-action -k version time_now "${PIN_TIME_NOW}"
+    section_begin "opam-pins-$do_pins_NAME" "Opam pins for $do_pins_NAME switch"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version base "${PIN_BASE}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version bigstringaf "${PIN_BIGSTRINGAF}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version core_kernel "${PIN_CORE_KERNEL}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version ctypes "${PIN_CTYPES}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version ctypes-foreign "${PIN_CTYPES_FOREIGN}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version curly "${PIN_CURLY}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version digestif "${PIN_DIGESTIF}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version dune "${PIN_DUNE}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version dune-configurator "${PIN_DUNE}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version ocamlbuild "${PIN_OCAMLBUILD}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version ocamlfind "${PIN_OCAMLFIND}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version ocp-indent "${PIN_OCP_INDENT}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version ppx_expect "${PIN_PPX_EXPECT}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version ptime "${PIN_PTIME}"
+    opamrun pin add --switch "$do_pins_NAME"  --yes --no-action -k version time_now "${PIN_TIME_NOW}"
+    section_end "opam-pins-$do_pins_NAME"
 }
 
-section_begin opam-pins 'Opam pins'
-do_pins
-section_end opam-pins
+do_pins dkml
+if [ "${SECONDARY_SWITCH:-}" = "true" ]; then
+    do_pins two
+fi
 
 do_use_vsstudio() {
+    do_use_vsstudio_NAME=$1
+    shift
     case "$dkml_host_abi" in
     windows_*)
-        section_begin use-vsstudio 'Use Visual Studio in dkml-* Opam packages (Windows)'
+        section_begin "use-vsstudio-$do_use_vsstudio_NAME" "Use Visual Studio in dkml-* Opam packages (Windows) for $do_use_vsstudio_NAME switch"
 
         # shellcheck disable=SC2153
         E_VS_DIR=$(escape_arg_as_ocaml_string "$VS_DIR")
@@ -1073,7 +1202,7 @@ do_use_vsstudio() {
                 echo Opam 2.0 support in dockcross to use a portable opam var prefix not yet implemented
                 exit 67
             fi
-            OP=$(opamrun var prefix)
+            OP=$(opamrun var prefix --switch "$do_use_vsstudio_NAME")
             OPSC=$OP/.opam-switch/switch-config
             if grep setenv: "$OPSC"; then
                 echo "INFO: Updating switch-config. Old was:"
@@ -1095,44 +1224,58 @@ do_use_vsstudio() {
             cat "$OPSC" >&2 # print
             ;;
         *)
-            opamrun option setenv= # reset
-            opamrun option setenv+='DKML_COMPILE_SPEC = "1"'
-            opamrun option setenv+='DKML_COMPILE_TYPE = "VS"'
-            opamrun option setenv+="DKML_COMPILE_VS_DIR = \"$E_VS_DIR\""
-            opamrun option setenv+="DKML_COMPILE_VS_VCVARSVER = \"$E_VS_VCVARSVER\""
-            opamrun option setenv+="DKML_COMPILE_VS_WINSDKVER = \"$E_VS_WINSDKVER\""
-            opamrun option setenv+="DKML_COMPILE_VS_MSVSPREFERENCE = \"$E_VS_MSVSPREFERENCE\""
-            opamrun option setenv+="DKML_COMPILE_VS_CMAKEGENERATOR = \"$E_VS_CMAKEGENERATOR\""
-            opamrun option setenv+="DKML_HOST_ABI = \"${dkml_host_abi}\""
-            opamrun option setenv # print
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv= # reset
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv+='DKML_COMPILE_SPEC = "1"'
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv+='DKML_COMPILE_TYPE = "VS"'
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv+="DKML_COMPILE_VS_DIR = \"$E_VS_DIR\""
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv+="DKML_COMPILE_VS_VCVARSVER = \"$E_VS_VCVARSVER\""
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv+="DKML_COMPILE_VS_WINSDKVER = \"$E_VS_WINSDKVER\""
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv+="DKML_COMPILE_VS_MSVSPREFERENCE = \"$E_VS_MSVSPREFERENCE\""
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv+="DKML_COMPILE_VS_CMAKEGENERATOR = \"$E_VS_CMAKEGENERATOR\""
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv+="DKML_HOST_ABI = \"${dkml_host_abi}\""
+            opamrun option --switch "$do_use_vsstudio_NAME" setenv # print
             ;;
         esac
 
         # shellcheck disable=SC2016
-        opamrun exec -- sh -c 'echo $VCToolsRedistDir'
+        opamrun exec --switch "$do_use_vsstudio_NAME" -- sh -c 'echo $VCToolsRedistDir'
 
-        section_end use-vsstudio
+        section_end "use-vsstudio-$do_use_vsstudio_NAME"
         ;;
     esac
 }
-do_use_vsstudio
+#   Make 'two' first so that 'dkml' is the final active switch.
+if [ "${SECONDARY_SWITCH:-}" = "true" ]; then
+    do_use_vsstudio two
+fi
+do_use_vsstudio dkml
 
 do_install_compiler() {
-    section_begin install-compiler "Install OCaml compiler"
-    opamrun pin list
+    do_install_compiler_NAME=$1
+    shift
+    section_begin "install-compiler-$do_install_compiler_NAME" "Install OCaml compiler for $do_install_compiler_NAME switch"
+    opamrun pin list --switch "$do_install_compiler_NAME"
     # shellcheck disable=SC2086
-    opamrun upgrade --yes dkml-base-compiler conf-dkml-cross-toolchain ${ocaml_options:-}
-    section_end install-compiler
+    opamrun upgrade --switch "$do_install_compiler_NAME" --yes dkml-base-compiler conf-dkml-cross-toolchain ${ocaml_options:-}
+    section_end "install-compiler-$do_install_compiler_NAME"
 }
-do_install_compiler
+do_install_compiler dkml
+if [ "${SECONDARY_SWITCH:-}" = "true" ]; then
+    do_install_compiler two
+fi
 
 do_summary() {
-    section_begin summary "Summary"
-    opamrun var
-    opamrun exec -- ocamlc -config
-    section_end summary
+    do_summary_NAME=$1
+    shift
+    section_begin "summary-$do_summary_NAME" "Summary for $do_summary_NAME switch"
+    opamrun var --switch "$do_summary_NAME"
+    opamrun exec --switch "$do_summary_NAME" -- ocamlc -config
+    section_end "summary-$do_summary_NAME"
 }
-do_summary
+do_summary dkml
+if [ "${SECONDARY_SWITCH:-}" = "true" ]; then
+    do_summary two
+fi
 
 '@
 Set-Content -Path ".ci\sd4\run-setup-dkml.sh" -Encoding Unicode -Value $Content
@@ -1307,7 +1450,8 @@ To continue your testing, run in PowerShell:
   \$env:exe_ext = "${env:exe_ext}"
   \$env:PC_PROJECT_DIR = $PWD
 
-  msys64\usr\bin\bash -lc 'PATH="\$PWD/.ci/sd4/opamrun:\$PATH"; opamrun install XYZ.opam'
+Now you can use 'opamrun' to do opam commands like:
 
-Use can you any opam-like command you want.
+  msys64\usr\bin\bash -lc 'PATH="\$PWD/.ci/sd4/opamrun:\$PATH"; opamrun install XYZ.opam'
+  msys64\usr\bin\bash -lc 'PATH="\$PWD/.ci/sd4/opamrun:\$PATH"; opamrun exec -- sh ci/build-test.sh'
 "@

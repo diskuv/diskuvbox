@@ -1,250 +1,157 @@
-# setup-dkml
-#   Short form: sd4
-  
-<#
-.SYNOPSIS
-
-Setup Diskuv OCaml (DKML) compiler on a desktop PC.
-
-.DESCRIPTION
-
-Setup Diskuv OCaml (DKML) compiler on a desktop PC.
-
-.PARAMETER PC_PROJECT_DIR
-Context variable for the project directory. Defaults to the current directory.
-
-.PARAMETER FDOPEN_OPAMEXE_BOOTSTRAP
-Input variable.
-
-.PARAMETER CACHE_PREFIX
-Input variable.
-
-.PARAMETER OCAML_COMPILER
-Input variable. -DKML_COMPILER takes priority. If -DKML_COMPILER is not set and -OCAML_COMPILER is set, then the specified OCaml version tag of dkml-compiler (ex. 4.12.1) is used.
-
-.PARAMETER DKML_COMPILER
-Input variable. Unspecified or blank is the latest from the default branch (main) of dkml-compiler. @repository@ is the latest from Opam.
-
-.PARAMETER SECONDARY_SWITCH
-Input variable. If true then the secondary switch named 'two' is created, in addition to the always-present 'dkml' switch. 
-
-.PARAMETER CONF_DKML_CROSS_TOOLCHAIN
-Input variable. Unspecified or blank is the latest from the default branch (main) of conf-dkml-cross-toolchain. @repository@ is the latest from Opam.
-
-.PARAMETER DISKUV_OPAM_REPOSITORY
-Input variable. Defaults to the value of -DEFAULT_DISKUV_OPAM_REPOSITORY_TAG (see below)
-
-# autogen from global_env_vars.
-.PARAMETER DEFAULT_DKML_COMPILER
-Environment variable.
-
-.PARAMETER PIN_BASE
-Environment variable.
-
-.PARAMETER PIN_BIGSTRINGAF
-Environment variable.
-
-.PARAMETER PIN_CORE_KERNEL
-Environment variable.
-
-.PARAMETER PIN_CTYPES_FOREIGN
-Environment variable.
-
-.PARAMETER PIN_CTYPES
-Environment variable.
-
-.PARAMETER PIN_CURLY
-Environment variable.
-
-.PARAMETER PIN_DIGESTIF
-Environment variable.
-
-.PARAMETER PIN_DUNE
-Environment variable.
-
-.PARAMETER PIN_OCAMLBUILD
-Environment variable.
-
-.PARAMETER PIN_OCAMLFIND
-Environment variable.
-
-.PARAMETER PIN_OCP_INDENT
-Environment variable.
-
-.PARAMETER PIN_PPX_EXPECT
-Environment variable.
-
-.PARAMETER PIN_PTIME
-Environment variable.
-
-.PARAMETER PIN_TIME_NOW
-Environment variable.
-
-#>
-[CmdletBinding()]
-param (
-  # Context variables
-  [Parameter(HelpMessage='Defaults to the current directory')]
-  [string]
-  $PC_PROJECT_DIR = $PWD,
-  
-  # Input variables
-  [Parameter()]
-  [string]
-  $FDOPEN_OPAMEXE_BOOTSTRAP = "false",
-  [Parameter()]
-  [string]
-  $CACHE_PREFIX = "v1",
-  [Parameter()]
-  [string]
-  $OCAML_COMPILER = "",
-  [Parameter()]
-  [string]
-  $DKML_COMPILER = "",
-  [Parameter()]
-  [string]
-  $SECONDARY_SWITCH = "false",
-  [Parameter()]
-  [string]
-  $CONF_DKML_CROSS_TOOLCHAIN = "@repository@",
-  [Parameter()]
-  [string]
-  $DISKUV_OPAM_REPOSITORY = ""
-
-  # Conflicts with automatic variable $Verbose
-  # [Parameter()]
-  # [string]
-  # $VERBOSE = "false"
-    
-  # Environment variables (can be overridden on command line)
-  # autogen from global_env_vars.
-  ,[Parameter()] [string] $DEFAULT_DKML_COMPILER = "4.12.1-v1.0.2"
-  ,[Parameter()] [string] $PIN_BASE = "v0.14.3"
-  ,[Parameter()] [string] $PIN_BIGSTRINGAF = "0.8.0"
-  ,[Parameter()] [string] $PIN_CORE_KERNEL = "v0.14.2"
-  ,[Parameter()] [string] $PIN_CTYPES_FOREIGN = "0.19.2-windowssupport-r4"
-  ,[Parameter()] [string] $PIN_CTYPES = "0.19.2-windowssupport-r4"
-  ,[Parameter()] [string] $PIN_CURLY = "0.2.1-windows-env_r2"
-  ,[Parameter()] [string] $PIN_DIGESTIF = "1.0.1"
-  ,[Parameter()] [string] $PIN_DUNE = "2.9.3"
-  ,[Parameter()] [string] $PIN_OCAMLBUILD = "0.14.0"
-  ,[Parameter()] [string] $PIN_OCAMLFIND = "1.9.1"
-  ,[Parameter()] [string] $PIN_OCP_INDENT = "1.8.2-windowssupport"
-  ,[Parameter()] [string] $PIN_PPX_EXPECT = "v0.14.1"
-  ,[Parameter()] [string] $PIN_PTIME = "0.8.6-msvcsupport"
-  ,[Parameter()] [string] $PIN_TIME_NOW = "v0.14.0"
-)
-
-$ErrorActionPreference = "Stop"
+#!/bin/sh
+set -euf
 
 # Reset environment so no conflicts with a parent Opam or OCaml system
-if (Test-Path Env:OPAMROOT)             { Remove-Item Env:OPAMROOT }
-if (Test-Path Env:OPAMSWITCH)           { Remove-Item Env:OPAMSWITCH }
-if (Test-Path Env:OPAM_SWITCH_PREFIX)   { Remove-Item Env:OPAM_SWITCH_PREFIX }
-if (Test-Path Env:CAML_LD_LIBRARY_PATH) { Remove-Item Env:CAML_LD_LIBRARY_PATH }
-if (Test-Path Env:OCAMLLIB)             { Remove-Item Env:OCAMLLIB }
-if (Test-Path Env:OCAML_TOPLEVEL_PATH)  { Remove-Item Env:OCAML_TOPLEVEL_PATH }
+unset OPAMROOT
+unset OPAM_SWITCH_PREFIX
+unset OPAMSWITCH
+unset CAML_LD_LIBRARY_PATH
+unset OCAMLLIB
+unset OCAML_TOPLEVEL_PATH
 
-# Pushdown context variables
-$env:PC_CI = 'true'
-$env:PC_PROJECT_DIR = $PC_PROJECT_DIR
+export PC_PROJECT_DIR="$PWD"
+export FDOPEN_OPAMEXE_BOOTSTRAP=false
+export CACHE_PREFIX=v1
+export OCAML_COMPILER=
+export DKML_COMPILER=
+export CONF_DKML_CROSS_TOOLCHAIN=@repository@
+export DISKUV_OPAM_REPOSITORY=
+export SECONDARY_SWITCH=false
+# autogen from global_env_vars.
+export DEFAULT_DKML_COMPILER='4.12.1-v1.0.2'
+export PIN_BASE='v0.14.3'
+export PIN_BIGSTRINGAF='0.8.0'
+export PIN_CORE_KERNEL='v0.14.2'
+export PIN_CTYPES_FOREIGN='0.19.2-windowssupport-r4'
+export PIN_CTYPES='0.19.2-windowssupport-r4'
+export PIN_CURLY='0.2.1-windows-env_r2'
+export PIN_DIGESTIF='1.0.1'
+export PIN_DUNE='2.9.3'
+export PIN_OCAMLBUILD='0.14.0'
+export PIN_OCAMLFIND='1.9.1'
+export PIN_OCP_INDENT='1.8.2-windowssupport'
+export PIN_PPX_EXPECT='v0.14.1'
+export PIN_PTIME='0.8.6-msvcsupport'
+export PIN_TIME_NOW='v0.14.0'
 
-# Pushdown input variables
-$env:FDOPEN_OPAMEXE_BOOTSTRAP = $FDOPEN_OPAMEXE_BOOTSTRAP
-$env:CACHE_PREFIX = $CACHE_PREFIX
-$env:OCAML_COMPILER = $OCAML_COMPILER
-$env:DKML_COMPILER = $DKML_COMPILER
-$env:CONF_DKML_CROSS_TOOLCHAIN = $CONF_DKML_CROSS_TOOLCHAIN
-$env:DISKUV_OPAM_REPOSITORY = $DISKUV_OPAM_REPOSITORY
+usage() {
+  echo 'Setup Diskuv OCaml (DKML) compiler on a desktop PC.' >&2
+  echo 'usage: setup-dkml-darwin_x86_64.sh [options]' >&2
+  echo 'Options:' >&2
+
+  # Context variables
+  echo "  --PC_PROJECT_DIR=<value>. Defaults to the current directory (${PC_PROJECT_DIR})" >&2
+
+  # Input variables
+  echo "  --FDOPEN_OPAMEXE_BOOTSTRAP=true|false. Defaults to: ${FDOPEN_OPAMEXE_BOOTSTRAP}" >&2
+  echo "  --CACHE_PREFIX=<value>. Defaults to: ${CACHE_PREFIX}" >&2
+  echo "  --OCAML_COMPILER=<value>. --DKML_COMPILER takes priority. If --DKML_COMPILER is not set and --OCAML_COMPILER is set, then the specified OCaml version tag of dkml-compiler (ex. 4.12.1) is used. Defaults to: ${OCAML_COMPILER}" >&2
+  echo "  --DKML_COMPILER=<value>. Unspecified or blank is the latest from the default branch (main) of dkml-compiler. Defaults to: ${DKML_COMPILER}" >&2
+  echo "  --SECONDARY_SWITCH=true|false. If true then the secondary switch named 'two' is created, in addition to the always-present 'dkml' switch. Defaults to: ${SECONDARY_SWITCH}" >&2
+  echo "  --CONF_DKML_CROSS_TOOLCHAIN=<value>. Unspecified or blank is the latest from the default branch (main) of conf-dkml-cross-toolchain. @repository@ is the latest from Opam. Defaults to: ${CONF_DKML_CROSS_TOOLCHAIN}" >&2
+  echo "  --DISKUV_OPAM_REPOSITORY=<value>. Defaults to the value of --DEFAULT_DISKUV_OPAM_REPOSITORY_TAG (see below)" >&2
+
+  # autogen from global_env_vars.
+  echo "  --DEFAULT_DKML_COMPILER=<value>. Defaults to: ${DEFAULT_DKML_COMPILER}" >&2
+  echo "  --PIN_BASE=<value>. Defaults to: ${PIN_BASE}" >&2
+  echo "  --PIN_BIGSTRINGAF=<value>. Defaults to: ${PIN_BIGSTRINGAF}" >&2
+  echo "  --PIN_CORE_KERNEL=<value>. Defaults to: ${PIN_CORE_KERNEL}" >&2
+  echo "  --PIN_CTYPES_FOREIGN=<value>. Defaults to: ${PIN_CTYPES_FOREIGN}" >&2
+  echo "  --PIN_CTYPES=<value>. Defaults to: ${PIN_CTYPES}" >&2
+  echo "  --PIN_CURLY=<value>. Defaults to: ${PIN_CURLY}" >&2
+  echo "  --PIN_DIGESTIF=<value>. Defaults to: ${PIN_DIGESTIF}" >&2
+  echo "  --PIN_DUNE=<value>. Defaults to: ${PIN_DUNE}" >&2
+  echo "  --PIN_OCAMLBUILD=<value>. Defaults to: ${PIN_OCAMLBUILD}" >&2
+  echo "  --PIN_OCAMLFIND=<value>. Defaults to: ${PIN_OCAMLFIND}" >&2
+  echo "  --PIN_OCP_INDENT=<value>. Defaults to: ${PIN_OCP_INDENT}" >&2
+  echo "  --PIN_PPX_EXPECT=<value>. Defaults to: ${PIN_PPX_EXPECT}" >&2
+  echo "  --PIN_PTIME=<value>. Defaults to: ${PIN_PTIME}" >&2
+  echo "  --PIN_TIME_NOW=<value>. Defaults to: ${PIN_TIME_NOW}" >&2
+  exit 2
+}
+fail() {
+  echo "Error: $*" >&2
+  exit 3
+}
+unset file
+
+OPTIND=1
+while getopts :h-: option; do
+  case $option in
+  h) usage ;;
+  -) case $OPTARG in
+    PC_PROJECT_DIR) fail "Option \"$OPTARG\" missing argument" ;;
+    PC_PROJECT_DIR=*) PC_PROJECT_DIR=${OPTARG#*=} ;;
+    CACHE_PREFIX) fail "Option \"$OPTARG\" missing argument" ;;
+    CACHE_PREFIX=*) CACHE_PREFIX=${OPTARG#*=} ;;
+    FDOPEN_OPAMEXE_BOOTSTRAP) fail "Option \"$OPTARG\" missing argument" ;;
+    FDOPEN_OPAMEXE_BOOTSTRAP=*) FDOPEN_OPAMEXE_BOOTSTRAP=${OPTARG#*=} ;;
+    OCAML_COMPILER) fail "Option \"$OPTARG\" missing argument" ;;
+    OCAML_COMPILER=*) OCAML_COMPILER=${OPTARG#*=} ;;
+    DKML_COMPILER) fail "Option \"$OPTARG\" missing argument" ;;
+    DKML_COMPILER=*) DKML_COMPILER=${OPTARG#*=} ;;
+    SECONDARY_SWITCH) fail "Option \"$OPTARG\" missing argument" ;;
+    SECONDARY_SWITCH=*) SECONDARY_SWITCH=${OPTARG#*=} ;;
+    CONF_DKML_CROSS_TOOLCHAIN) fail "Option \"$OPTARG\" missing argument" ;;
+    CONF_DKML_CROSS_TOOLCHAIN=*) CONF_DKML_CROSS_TOOLCHAIN=${OPTARG#*=} ;;
+    DISKUV_OPAM_REPOSITORY) fail "Option \"$OPTARG\" missing argument" ;;
+    DISKUV_OPAM_REPOSITORY=*) DISKUV_OPAM_REPOSITORY=${OPTARG#*=} ;;
+    # autogen from global_env_vars.
+    DEFAULT_DKML_COMPILER) fail "Option \"$OPTARG\" missing argument" ;;
+    DEFAULT_DKML_COMPILER=*) DEFAULT_DKML_COMPILER=${OPTARG#*=} ;;
+    PIN_BASE) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_BASE=*) PIN_BASE=${OPTARG#*=} ;;
+    PIN_BIGSTRINGAF) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_BIGSTRINGAF=*) PIN_BIGSTRINGAF=${OPTARG#*=} ;;
+    PIN_CORE_KERNEL) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_CORE_KERNEL=*) PIN_CORE_KERNEL=${OPTARG#*=} ;;
+    PIN_CTYPES_FOREIGN) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_CTYPES_FOREIGN=*) PIN_CTYPES_FOREIGN=${OPTARG#*=} ;;
+    PIN_CTYPES) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_CTYPES=*) PIN_CTYPES=${OPTARG#*=} ;;
+    PIN_CURLY) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_CURLY=*) PIN_CURLY=${OPTARG#*=} ;;
+    PIN_DIGESTIF) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_DIGESTIF=*) PIN_DIGESTIF=${OPTARG#*=} ;;
+    PIN_DUNE) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_DUNE=*) PIN_DUNE=${OPTARG#*=} ;;
+    PIN_OCAMLBUILD) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_OCAMLBUILD=*) PIN_OCAMLBUILD=${OPTARG#*=} ;;
+    PIN_OCAMLFIND) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_OCAMLFIND=*) PIN_OCAMLFIND=${OPTARG#*=} ;;
+    PIN_OCP_INDENT) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_OCP_INDENT=*) PIN_OCP_INDENT=${OPTARG#*=} ;;
+    PIN_PPX_EXPECT) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_PPX_EXPECT=*) PIN_PPX_EXPECT=${OPTARG#*=} ;;
+    PIN_PTIME) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_PTIME=*) PIN_PTIME=${OPTARG#*=} ;;
+    PIN_TIME_NOW) fail "Option \"$OPTARG\" missing argument" ;;
+    PIN_TIME_NOW=*) PIN_TIME_NOW=${OPTARG#*=} ;;
+    help) usage ;;
+    help=*) fail "Option \"${OPTARG%%=*}\" has unexpected argument" ;;
+    *) fail "Unknown long option \"${OPTARG%%=*}\"" ;;
+    esac ;;
+  '?') fail "Unknown short option \"$OPTARG\"" ;;
+  :) fail "Short option \"$OPTARG\" missing argument" ;;
+  *) fail "Bad state in getopts (OPTARG=\"$OPTARG\")" ;;
+  esac
+done
+shift $((OPTIND - 1))
 
 # Set matrix variables
-# autogen from pc_matrix. only windows_x86_64
-$env:abi_pattern = "win32-windows_x86_64"
-$env:msys2_system = "CLANG64"
-$env:msys2_packages = "mingw-w64-clang-x86_64-pkg-config"
-$env:exe_ext = ".exe"
-$env:bootstrap_opam_version = "2.2.0-dkml20220801T155940Z"
-$env:opam_abi = "windows_x86_64"
-$env:dkml_host_abi = "windows_x86_64"
-$env:opam_root = "${env:PC_PROJECT_DIR}/.ci/o"
-$env:vsstudio_hostarch = "x64"
-$env:vsstudio_arch = "x64"
+# autogen from pc_matrix. only darwin_x86_64
+export abi_pattern="macos-darwin_all"
+export bootstrap_opam_version="2.2.0-dkml20220801T155940Z"
+export dkml_host_abi="darwin_x86_64"
+export opam_root="${PC_PROJECT_DIR}/.ci/o"
 
-
-# Set environment variables
-# autogen from global_env_vars.
-$env:DEFAULT_DKML_COMPILER = $DEFAULT_DKML_COMPILER
-$env:PIN_BASE = $PIN_BASE
-$env:PIN_BIGSTRINGAF = $PIN_BIGSTRINGAF
-$env:PIN_CORE_KERNEL = $PIN_CORE_KERNEL
-$env:PIN_CTYPES_FOREIGN = $PIN_CTYPES_FOREIGN
-$env:PIN_CTYPES = $PIN_CTYPES
-$env:PIN_CURLY = $PIN_CURLY
-$env:PIN_DIGESTIF = $PIN_DIGESTIF
-$env:PIN_DUNE = $PIN_DUNE
-$env:PIN_OCAMLBUILD = $PIN_OCAMLBUILD
-$env:PIN_OCAMLFIND = $PIN_OCAMLFIND
-$env:PIN_OCP_INDENT = $PIN_OCP_INDENT
-$env:PIN_PPX_EXPECT = $PIN_PPX_EXPECT
-$env:PIN_PTIME = $PIN_PTIME
-$env:PIN_TIME_NOW = $PIN_TIME_NOW
-
-# https://patchwork.kernel.org/project/qemu-devel/patch/20211215073402.144286-17-thuth@redhat.com/
-$env:CHERE_INVOKING = "yes" # Preserve the current working directory
-$env:MSYSTEM = $env:msys2_system # Start a 64 bit environment if CLANG64, etc.
 
 ########################### before_script ###############################
 
-# Troubleshooting
-If ( "${env:VERBOSE}" -eq "true" ) { Get-ChildItem 'env:' }
+echo "Writing scripts ..."
+install -d .ci/sd4
 
-# -----
-# MSYS2
-# -----
-#
-# https://www.msys2.org/docs/ci/
-# https://patchwork.kernel.org/project/qemu-devel/patch/20211215073402.144286-17-thuth@redhat.com/
-
-if ( Test-Path -Path msys64\usr\bin\pacman.exe ) {
-  Write-Host "Re-using MSYS2 from cache."
-}
-else {
-  Write-Host "Download the archive ..."
-  If ( !(Test-Path -Path msys64\var\cache ) ) { New-Item msys64\var\cache -ItemType Directory | Out-Null }
-  If ( !(Test-Path -Path msys64\var\cache\msys2.exe ) ) { Invoke-WebRequest "https://github.com/msys2/msys2-installer/releases/download/2022-09-04/msys2-base-x86_64-20220904.sfx.exe" -outfile "msys64\var\cache\msys2.exe" }
-
-  Write-Host "Extract the archive ..."
-  msys64\var\cache\msys2.exe -y # Extract to .\msys64
-  Remove-Item msys64\var\cache\msys2.exe # Delete the archive again
-  ((Get-Content -path msys64\etc\post-install\07-pacman-key.post -Raw) -replace '--refresh-keys', '--version') | Set-Content -Path msys64\etc\post-install\07-pacman-key.post
-  msys64\usr\bin\bash -lc "sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf"
-
-  Write-Host "Run for the first time ..."
-  msys64\usr\bin\bash -lc ' '
-}
-Write-Host "Update MSYS2 ..."
-msys64\usr\bin\bash -lc 'pacman --noconfirm -Syuu' # Core update (in case any core packages are outdated)
-msys64\usr\bin\bash -lc 'pacman --noconfirm -Syuu' # Normal update
-taskkill /F /FI "MODULES eq msys-2.0.dll"
-
-Write-Host "Install matrix, required and CI packages ..."
-#   Packages for GitLab CI:
-#     dos2unix (used to translate PowerShell written files below in this CI .yml into MSYS2 scripts)
-msys64\usr\bin\bash -lc 'set -x; pacman -Sy --noconfirm --needed ${msys2_packages}  wget make rsync diffutils patch unzip git tar xz dos2unix'
-
-Write-Host "Uninstall MSYS2 conflicting executables ..."
-msys64\usr\bin\bash -lc 'rm -vf /usr/bin/link.exe' # link.exe interferes with MSVC's link.exe
-
-Write-Host "Installing VSSetup for the Get-VSSetupInstance function ..."
-Install-Module VSSetup -Scope CurrentUser -Force
-
-Write-Host "Writing scripts ..."
-
-# POSIX and AWK scripts
-
-If ( !(Test-Path -Path.ci\sd4 ) ) { New-Item .ci\sd4 -ItemType Directory | Out-Null }
-
-$Content = @'
+cat > .ci/sd4/common-values.sh <<'end_of_script'
 #!/bin/sh
 
 # ------------------------ Log Formatting ------------------------
@@ -295,12 +202,9 @@ section_end() {
     print_section_end "$section_NAME"
 }
 
-'@
-Set-Content -Path ".ci\sd4\common-values.sh" -Encoding Unicode -Value $Content
-msys64\usr\bin\bash -lc 'dos2unix .ci/sd4/common-values.sh'
+end_of_script
 
-
-$Content = @'
+cat > .ci/sd4/run-checkout-code.sh <<'end_of_script'
 #!/bin/sh
 
 # ================
@@ -402,12 +306,9 @@ windows_*)
     ;;
 esac
 
-'@
-Set-Content -Path ".ci\sd4\run-checkout-code.sh" -Encoding Unicode -Value $Content
-msys64\usr\bin\bash -lc 'dos2unix .ci/sd4/run-checkout-code.sh'
+end_of_script
 
-
-$Content = @'
+cat > .ci/sd4/run-setup-dkml.sh <<'end_of_script'
 #!/bin/sh
 set -euf
 
@@ -1276,181 +1177,25 @@ if [ "${SECONDARY_SWITCH:-}" = "true" ]; then
     do_summary two
 fi
 
-'@
-Set-Content -Path ".ci\sd4\run-setup-dkml.sh" -Encoding Unicode -Value $Content
-msys64\usr\bin\bash -lc 'dos2unix .ci/sd4/run-setup-dkml.sh'
+end_of_script
 
-$Content = @'
-# MSVC environment variables:
-# 1. https://docs.microsoft.com/en-us/cpp/build/reference/cl-environment-variables?view=msvc-170
-# 2. https://docs.microsoft.com/en-us/cpp/build/reference/linking?view=msvc-170#link-environment-variables (except TMP)
-# 3. VCToolsRedistDir: https://docs.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-170#locate-the-redistributable-files
-BEGIN{FS="="}
-$1=="CL"||$1=="_CL_"||$1=="INCLUDE"||$1=="LIBPATH" {print "export " $0}
-$1=="LINK"||$1=="_LINK_"||$1=="LIB"||$1=="PATH"    {print "export " $0}
-$1=="VCToolsRedistDir"                             {print "export " $0}
+sh .ci/sd4/run-checkout-code.sh PC_PROJECT_DIR "${PC_PROJECT_DIR}"
+sh .ci/sd4/run-setup-dkml.sh PC_PROJECT_DIR "${PC_PROJECT_DIR}"
 
-'@
-Set-Content -Path ".ci\sd4\msvcenv.awk" -Encoding Unicode -Value $Content
-msys64\usr\bin\bash -lc 'dos2unix .ci/sd4/msvcenv.awk'
-
-
-$Content = @'
-{
-    # trim leading and trailing space
-    sub(/^ */, "");
-    sub(/ *$/, "");
-
-    print "export PATH='" $0 "'";
-}
-'@
-Set-Content -Path ".ci\sd4\msvcpath.awk" -Encoding Unicode -Value $Content
-msys64\usr\bin\bash -lc 'dos2unix .ci/sd4/msvcpath.awk'
-
-# PowerShell (UTF-16) and Batch (ANSI) scripts
-
-
-$Content = @'
-# Diagnose Visual Studio environment variables (Windows)
-# This wastes time and has lots of rows! Only run if "VERBOSE" GitHub input key.
-if ( "${env:VERBOSE}" -eq "true" ) {
-    if (Test-Path -Path "C:\Program Files (x86)\Windows Kits\10\include") {
-        Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\include"
-    }
-    if (Test-Path -Path "C:\Program Files (x86)\Windows Kits\10\Extension SDKs\WindowsDesktop") {
-        Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Extension SDKs\WindowsDesktop"
-    }
-
-    $env:PSModulePath += "$([System.IO.Path]::PathSeparator).ci\sd4\g\dkml-runtime-distribution\src\windows"
-    Import-Module Machine
-
-    $allinstances = Get-VSSetupInstance
-    $allinstances | ConvertTo-Json -Depth 5
-}
-
-# Make export expression [SN]NAME=[SV]VALUE[EV]
-# where [SN] is start name and [SV] and [EV] are start and end value
-if (("${env:GITLAB_CI}" -eq "true") -or ("${env:PC_CI}" -eq "true")) {
-    # Executed immediately in POSIX shell, so must be a real POSIX shell variable declaration
-    $ExportSN = "export "
-    $ExportSV = "'"
-    $ExportEV = "'"
-    $ExportExt = ".sh"
-} else {
-    # Goes into $env:GITHUB_ENV, so must be plain NAME=VALUE
-    $ExportSN = ""
-    $ExportSV = ""
-    $ExportEV = ""
-    $ExportExt = ".github"
-}
-
-# Locate Visual Studio (Windows)
-if ("${env:vsstudio_dir}" -eq "" -and (!(Test-Path -Path .ci/sd4/vsenv${ExportExt}))) {
-    $env:PSModulePath += "$([System.IO.Path]::PathSeparator).ci\sd4\g\dkml-runtime-distribution\src\windows"
-    Import-Module Machine
-
-    $CompatibleVisualStudios = Get-CompatibleVisualStudios -ErrorIfNotFound
-    $CompatibleVisualStudios
-    $ChosenVisualStudio = ($CompatibleVisualStudios | Select-Object -First 1)
-    $VisualStudioProps = Get-VisualStudioProperties -VisualStudioInstallation $ChosenVisualStudio
-    $VisualStudioProps
-
-    Write-Output "${ExportSN}VS_DIR=${ExportSV}$($VisualStudioProps.InstallPath)${ExportEV}" > .ci/sd4/vsenv${ExportExt}
-    Write-Output "${ExportSN}VS_VCVARSVER=${ExportSV}$($VisualStudioProps.VcVarsVer)${ExportEV}" >> .ci/sd4/vsenv${ExportExt}
-    Write-Output "${ExportSN}VS_WINSDKVER=${ExportSV}$($VisualStudioProps.WinSdkVer)${ExportEV}" >> .ci/sd4/vsenv${ExportExt}
-    Write-Output "${ExportSN}VS_MSVSPREFERENCE=${ExportSV}$($VisualStudioProps.MsvsPreference)${ExportEV}" >> .ci/sd4/vsenv${ExportExt}
-    Write-Output "${ExportSN}VS_CMAKEGENERATOR=${ExportSV}$($VisualStudioProps.CMakeGenerator)${ExportEV}" >> .ci/sd4/vsenv${ExportExt}
-}
-
-# Link to hardcoded Visual Studio (Windows)
-if ("${env:vsstudio_dir}" -ne "") {
-    Write-Output "${ExportSN}VS_DIR=${ExportSV}${env:vsstudio_dir}${ExportEV}" > .ci/sd4/vsenv${ExportExt}
-    Write-Output "${ExportSN}VS_VCVARSVER=${ExportSV}${env:vsstudio_vcvarsver}${ExportEV}" >> .ci/sd4/vsenv${ExportExt}
-    Write-Output "${ExportSN}VS_WINSDKVER=${ExportSV}${env:vsstudio_winsdkver}${ExportEV}" >> .ci/sd4/vsenv${ExportExt}
-    Write-Output "${ExportSN}VS_MSVSPREFERENCE=${ExportSV}${env:vsstudio_msvspreference}${ExportEV}" >> .ci/sd4/vsenv${ExportExt}
-    Write-Output "${ExportSN}VS_CMAKEGENERATOR=${ExportSV}${env:vsstudio_cmakegenerator}${ExportEV}" >> .ci/sd4/vsenv${ExportExt}
-}
-
-'@
-Set-Content -Path ".ci\sd4\config-vsstudio.ps1" -Encoding Unicode -Value $Content
-
-
-$Content = @'
-@ECHO OFF
-
-REM The OCaml dkml-base-compiler will compile fine but any other
-REM packages (ocamlbuild, etc.) which
-REM need a native compiler will fail without the MSVC compiler in the
-REM PATH. There isn't a `with-dkml.exe` alternative available at
-REM this stage of the GitHub workflow.
-call "%VS_DIR%\Common7\Tools\VsDevCmd.bat" -no_logo -host_arch=%vsstudio_hostarch% -arch=%vsstudio_arch% -vcvars_ver=%VS_VCVARSVER% -winsdk=%VS_WINSDKVER%
-if %ERRORLEVEL% neq 0 (
-    echo.
-    echo.The "%VS_DIR%\Common7\Tools\VsDevCmd.bat" command failed
-    echo.with exit code %ERRORLEVEL%.
-    echo.
-    exit /b %ERRORLEVEL%
-)
-
-REM VsDevCmd.bat turns off echo; be explicit if we want it on or off
-@echo OFF
-
-REM MSVC environment variables in Unix format.
-echo %PATH% > .ci\sd4\msvcpath
-
-
-REM * We can't use `bash -lc` directly to query for all MSVC environment variables
-REM   because it stomps over the PATH. So we are inside a Batch script to do the query.
-msys64\usr\bin\bash -lc "set | grep -v '^PATH=' | awk -f .ci/sd4/msvcenv.awk > .ci/sd4/msvcenv"
-'@
-Set-Content -Path ".ci\sd4\get-msvcpath-into-msys2.cmd" -Encoding Default -Value $Content
-
-msys64\usr\bin\bash -lc "sh .ci/sd4/run-checkout-code.sh PC_PROJECT_DIR '${env:PC_PROJECT_DIR}'"
-
-# Diagnose Visual Studio environment variables (Windows)
-# This wastes time and has lots of rows! Only run if "VERBOSE" GitHub input key.
-
-If ( "${env:VERBOSE}" -eq "true" ) {
-  if (Test-Path -Path "C:\Program Files (x86)\Windows Kits\10\include") {
-    Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\include"
-  }
-  if (Test-Path -Path "C:\Program Files (x86)\Windows Kits\10\Extension SDKs\WindowsDesktop") {
-    Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Extension SDKs\WindowsDesktop"
-  }
-
-  $env:PSModulePath += "$([System.IO.Path]::PathSeparator).ci\sd4\g\dkml-runtime-distribution\src\windows"
-  Import-Module Machine
-
-  $allinstances = Get-VSSetupInstance
-  $allinstances | ConvertTo-Json -Depth 5
-}
-.ci\sd4\config-vsstudio.ps1
-msys64\usr\bin\bash -lc "dos2unix .ci/sd4/vsenv.sh"
-Get-Content .ci/sd4/vsenv.sh
-
-# Capture Visual Studio compiler environment
-msys64\usr\bin\bash -lc ". .ci/sd4/vsenv.sh && cmd /c .ci/sd4/get-msvcpath-into-msys2.cmd"
-msys64\usr\bin\bash -lc "cat .ci/sd4/msvcpath | tr -d '\r' | cygpath --path -f - | awk -f .ci/sd4/msvcpath.awk >> .ci/sd4/msvcenv"    
-msys64\usr\bin\bash -lc "tail -n100 .ci/sd4/msvcpath .ci/sd4/msvcenv"
-
-msys64\usr\bin\bash -lc "sh .ci/sd4/run-setup-dkml.sh PC_PROJECT_DIR '${env:PC_PROJECT_DIR}'"
-
-########################### script ###############################
-
-Write-Host @"
+# shellcheck disable=SC2154
+echo "
 Finished setup.
 
-To continue your testing, run in PowerShell:
-  \$env:CHERE_INVOKING = "yes"
-  \$env:MSYSTEM = "$env:msys2_system"
-  \$env:dkml_host_abi = "$env:dkml_host_abi"
-  \$env:abi_pattern = "$env:abi_pattern"
-  \$env:opam_root = "$env:opam_root"
-  \$env:exe_ext = "${env:exe_ext}"
-  \$env:PC_PROJECT_DIR = $PWD
+To continue your testing, run:
+  export dkml_host_abi='${dkml_host_abi}'
+  export abi_pattern='${abi_pattern}'
+  export opam_root='${opam_root}'
+  export exe_ext='${exe_ext:-}'
+  export PC_PROJECT_DIR='$PWD'
+  export PATH=\"$PC_PROJECT_DIR/.ci/sd4/opamrun:\$PATH\"
 
 Now you can use 'opamrun' to do opam commands like:
 
-  msys64\usr\bin\bash -lc 'PATH="\$PWD/.ci/sd4/opamrun:\$PATH"; opamrun install XYZ.opam'
-  msys64\usr\bin\bash -lc 'PATH="\$PWD/.ci/sd4/opamrun:\$PATH"; opamrun exec -- sh ci/build-test.sh'
-"@
+  opamrun install XYZ.opam
+  opamrun exec -- sh ci/build-test.sh
+"
