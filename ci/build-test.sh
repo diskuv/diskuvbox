@@ -108,16 +108,14 @@ darwin_x86_64)
 esac
 if [ -n "$dunecontext" ]; then
     #   1. Get a copy of opam-installer from the 'two' secondary switch. We'll just need the binary.
-    if [ ! -x .ci/cross/opam-installer ] && [ ! -x .ci/cross/opam-installer.exe ]; then
-        install -d .ci/cross
-        opamrun list --switch two
-        opamrun install opam-installer --switch two --yes
-        opaminstaller="${opam_root}/two/bin/opam-installer"
-        if [ -x "$opaminstaller.exe" ]; then
-            install "$opaminstaller.exe" .ci/cross/opam-installer.exe
-        else
-            install "$opaminstaller" .ci/cross/opam-installer
-        fi
+    install -d .ci/cross
+    opamrun list --switch two
+    opamrun install opam-installer --switch two --yes
+    opaminstaller="${opam_root}/two/bin/opam-installer"
+    if [ -x "$opaminstaller.exe" ]; then
+        install "$opaminstaller.exe" .ci/cross/opam-installer.exe
+    else
+        install "$opaminstaller" .ci/cross/opam-installer
     fi
     #   2. Use Dune-ified packages so can cross-compile (same principle underneath Opam monorepo).
     #      Opam monorepo doesn't work yet for dkml-base-compiler.
