@@ -37,14 +37,6 @@ run a command like `diskuvbox copy-file` *or (PENDING) make a symlink from
 
 ## Usage
 
-### Download
-
-Binaries are available for download at https://github.com/diskuv/diskuvbox/releases:
-- Windows on Intel 32/64bit. On very new PCs you may have to pre-install `vc_redist.exe`
-  which is included for download.
-- Linux on Intel 32/64bit
-- macOS on Intel/Silicon
-
 ### Add as an Opam Dependency
 
 If you are an OCaml developer who creates or maintains an Opam package, add
