@@ -29,7 +29,7 @@
   (logs     (>= 0.7.0))
   (mdx      (and (>= 2.0.0) :with-test))
   (cmdliner (>= 1.0.0))
-  (dkml-workflows (and (>= 1.0.0) :build))
+  (dkml-workflows (and (>= 1.1.0) :build))
   ; these are used in src/lib/dune.runlicense.inc
   (headache    (and (>= 1.05)   :build))
   (ocamlformat (and (>= 0.19.0) :build))
