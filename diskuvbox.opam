@@ -8,6 +8,7 @@ maintainer: ["opensource+diskuv-ocaml@support.diskuv.com"]
 authors: ["Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>"]
 license: "Apache-2.0"
 homepage: "https://github.com/diskuv/diskuvbox"
+doc: "https://diskuv.github.io/diskuvbox/diskuvbox/index.html"
 bug-reports: "https://github.com/diskuv/diskuvbox/issues"
 depends: [
   "dune" {>= "2.9"}

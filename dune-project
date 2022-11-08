@@ -12,6 +12,7 @@
 (license Apache-2.0)
 (authors "Diskuv, Inc. <opensource+diskuv-ocaml@support.diskuv.com>")
 (maintainers "opensource+diskuv-ocaml@support.diskuv.com")
+(documentation https://diskuv.github.io/diskuvbox/diskuvbox/index.html)
 
 (package
  (name diskuvbox)
