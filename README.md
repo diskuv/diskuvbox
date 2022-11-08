@@ -27,6 +27,7 @@ run a command like `diskuvbox copy-file` *or (PENDING) make a symlink from
 
 | Section      | Page                                                                   |
 | ------------ | ---------------------------------------------------------------------- |
+| Usage        | [Download binaries](#download-binaries)                                |
 | Usage        | [Add as an Opam Dependency](#add-as-an-opam-dependency)                |
 | Usage        | [Using in Dune cram tests](#using-in-dune-cram-tests)                  |
 | Usage        | [Using in Opam build steps](#using-in-opam-build-steps)                |
@@ -36,6 +37,28 @@ run a command like `diskuvbox copy-file` *or (PENDING) make a symlink from
 | Contributing | [Your Contributions](CONTRIBUTORS.md)                                  |
 
 ## Usage
+
+### Download binaries
+
+Download the latest binary from the [diskuvbox releases] site.
+
+Available for:
+* Windows/Intel 32-bit
+* Windows/Intel 64-bit
+* macOS/Intel
+* macOS/ARM64 (Apple Silicon M1 and M2)
+* Linux/Intel 32-bit
+* Linux/Intel 64-bit
+
+**Windows?** On a recently purchased Windows machine you may see:
+
+![image that vcruntime140.dll is missing](https://github.com/diskuv/dkml-workflows/raw/bf92f534506340d62055b5d24e04b94dfb07693f/images/vcruntime140_missing.png)
+
+Install `vc_redist.x86.exe` on 32-bit Windows or `vc_redist.x64.exe` on 64-bit
+Windows to avoid that error. Both of those are available from the
+[diskuvbox releases] site.
+
+[diskuvbox releases]: https://github.com/diskuv/diskuvbox/releases
 
 ### Add as an Opam Dependency
 
