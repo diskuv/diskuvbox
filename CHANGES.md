@@ -1,4 +1,5 @@
-## Pending
+## 0.1.1
+
 - Use memory buffering to copy files. Removes 16 MiB max file limitation on
   32-bit OCaml.
 - Validate and document a bytecode guarantee that only standard stublibs are used

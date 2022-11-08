@@ -1,7 +1,7 @@
 (lang dune 2.9)
 
 (name diskuvbox)
-(version 0.1.0)
+(version 0.1.1)
 (cram enable)
 (using mdx 0.1)
 
