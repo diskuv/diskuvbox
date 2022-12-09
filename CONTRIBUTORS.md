@@ -35,7 +35,8 @@ If you would like to develop a new Box command, you will need to:
   `dune build @runmarkdown --auto-promote`.
 
 Before submitting your PR make sure you have:
-1. Run `dune build`
-2. Run `dune runtest`
-3. Run `dune build @runmarkdown --auto-promote`
-4. Run `dune build @runlicense --auto-promote`
+1. Run `opam install . --deps-only --with-test`
+2. Run `dune build`
+3. Run `dune runtest`
+4. Run `dune build @runmarkdown --auto-promote`
+5. Run `dune build @runlicense --auto-promote`

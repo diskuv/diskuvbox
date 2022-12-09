@@ -1,4 +1,5 @@
 (executable
+ (package diskuvbox)
  (name main)
  (public_name diskuvbox)
  (modes byte exe)

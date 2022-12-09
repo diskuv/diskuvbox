@@ -3,6 +3,7 @@
 ## Upgrading the DKML scripts
 
 ```bash
+opam install ./diskuvbox.opam --deps-only
 opam upgrade dkml-workflows
 
 # Regenerate the DKML workflow scaffolding

@@ -1,3 +1,8 @@
+## 0.1.2
+
+- Reduce the number of opam dependencies by splitting diskuvbox.opam from
+  diskuvbox-hygiene.opam
+
 ## 0.1.1
 
 - Use memory buffering to copy files. Removes 16 MiB max file limitation on

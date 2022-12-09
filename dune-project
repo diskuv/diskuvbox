@@ -30,8 +30,17 @@
   (logs     (>= 0.7.0))
   (mdx      (and (>= 2.0.0) :with-test))
   (cmdliner (>= 1.0.0))
-  (dkml-workflows (and (>= 1.1.0) :build))
+  ))
+
+(package
+ (name diskuvbox-hygiene)
+ (synopsis "Code hygiene for diskuvbox: formatting, licenses, embedded docs")
+ (description
+  "Code hygiene tools that minimize the dependencies for diskuvbox itself.")
+ (depends
+  (diskuvbox     (= :version))
+  (dkml-workflows (>= 1.1.0))
   ; these are used in src/lib/dune.runlicense.inc
-  (headache    (and (>= 1.05)   :build))
-  (ocamlformat (and (>= 0.19.0) :build))
+  (headache    (>= 1.05))
+  (ocamlformat (= 0.19.0))
   ))
