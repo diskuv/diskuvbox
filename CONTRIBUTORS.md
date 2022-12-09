@@ -40,3 +40,4 @@ Before submitting your PR make sure you have:
 3. Run `dune runtest`
 4. Run `dune build @runmarkdown --auto-promote`
 5. Run `dune build @runlicense --auto-promote`
+6. Run `dune fmt`

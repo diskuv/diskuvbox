@@ -7,5 +7,5 @@ opam install ./diskuvbox.opam --deps-only
 opam upgrade dkml-workflows
 
 # Regenerate the DKML workflow scaffolding
-opam exec -- generate-setup-dkml-scaffold && dune build '@gen-dkml' --auto-promote
+opam exec -- generate-setup-dkml-scaffold && dune build '@gen-dkml' --auto-promote && dune build '@ci/setup-dkml/fmt'
 ```
