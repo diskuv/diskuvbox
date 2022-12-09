@@ -7,18 +7,26 @@
 ;   Unix: dune build @runmarkdown --auto-promote
 
 ; This is so that MDX can run `diskuvbox` directly.
+
 (rule
  (target diskuvbox.exe)
- (action (copy src/bin/main.exe %{target})))
+ (action
+  (copy src/bin/main.exe %{target})))
 
 ; BEGIN HACK - Workaround unsupported ```console blocks
+
 (rule
  (alias runmarkdown)
- (deps (:in README.md) diskuvbox.exe src/lib/dune.runlicense.inc)
+ (deps
+  (:in README.md)
+  diskuvbox.exe
+  src/lib/dune.runlicense.inc)
  (action
   (progn
    (run ./mdx-console.sh %{in})
-   (no-infer (diff README.md README.md.corrected)))))
+   (no-infer
+    (diff README.md README.md.corrected)))))
+
 ; END HACK
 
 ; Use the following to update the docs ...

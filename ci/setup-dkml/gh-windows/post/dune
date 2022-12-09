@@ -3,15 +3,15 @@
 ;   opam upgrade dkml-workflows && opam exec -- generate-setup-dkml-scaffold && dune build '@gen-dkml' --auto-promote
 
 (rule
-  (alias gen-dkml)
-  (target action.gen.yml)
-  (action
-    (setenv
-     OCAMLRUNPARAM
-     b
-    (run gh-dkml-action-yml --phase post --output-windows %{target}))))
+ (alias gen-dkml)
+ (target action.gen.yml)
+ (action
+  (setenv
+   OCAMLRUNPARAM
+   b
+   (run gh-dkml-action-yml --phase post --output-windows %{target}))))
 
 (rule
-  (alias gen-dkml)
-  (action
-    (diff action.yml action.gen.yml)))
+ (alias gen-dkml)
+ (action
+  (diff action.yml action.gen.yml)))

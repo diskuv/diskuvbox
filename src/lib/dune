@@ -10,4 +10,5 @@
 ;
 ; If you are reading this, do not just blindly copy the (include) clause!
 ; Just copy the contents of `dune.runlicense.inc` into your own dune file.
+
 (include dune.runlicense.inc)

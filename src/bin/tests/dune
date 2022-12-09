@@ -1,5 +1,7 @@
 (rule
  (target diskuvbox.exe)
- (action (copy ../main.exe %{target})))
+ (action
+  (copy ../main.exe %{target})))
 
-(cram (deps ./diskuvbox.exe))
+(cram
+ (deps ./diskuvbox.exe))
