@@ -1,7 +1,7 @@
 (lang dune 2.9)
 
 (name diskuvbox)
-(version 0.1.1)
+(version 0.1.2)
 (cram enable)
 (using mdx 0.1)
 
@@ -33,10 +33,10 @@
   ))
 
 (package
- (name diskuvbox-hygiene)
- (synopsis "Code hygiene for diskuvbox: formatting, licenses, embedded docs")
+ (name diskuvbox-maintain)
+ (synopsis "Maintenance for diskuvbox: formatting, licenses, embedded docs")
  (description
-  "Code hygiene tools that minimize the dependencies for diskuvbox itself.")
+  "Maintenance tools that minimize the dependencies for diskuvbox itself.")
  (depends
   (diskuvbox     (= :version))
   (dkml-workflows (>= 1.1.0))

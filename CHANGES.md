@@ -1,7 +1,7 @@
 ## 0.1.2
 
 - Reduce the number of opam dependencies by splitting diskuvbox.opam from
-  diskuvbox-hygiene.opam
+  diskuvbox-maintain.opam
 
 ## 0.1.1
 
