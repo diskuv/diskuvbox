@@ -14,12 +14,8 @@
 (*  limitations under the License.                                            *)
 (******************************************************************************)
 
-(* Cmdliner 1.0 -> 1.1 deprecated a lot of things. But until Cmdliner 1.1
-   is in common use in Opam packages we should provide backwards compatibility.
-   In fact, Diskuv OCaml is not even using Cmdliner 1.1. *)
-[@@@alert "-deprecated"]
-
 module Arg = Cmdliner.Arg
+module Cmd = Cmdliner.Cmd
 module Manpage = Cmdliner.Manpage
 module Term = Cmdliner.Term
 
@@ -196,11 +192,12 @@ let copy_file_cmd =
     fail_if_error
       (Diskuvbox.copy_file ~err:box_err ?mode:chmod_mode_opt ~src ~dst ())
   in
-  ( Term.(
+  Cmd.v
+    (Cmd.info "copy-file" ~doc ~man)
+    Term.(
       const copy_file $ copts_t
       $ source_file_t ~verb:"to copy"
-      $ dest_file_t $ chmod_mode_opt_t),
-    Term.info "copy-file" ~doc ~exits:Term.default_exits ~man )
+      $ dest_file_t $ chmod_mode_opt_t)
 
 let copy_file_into_cmd =
   let doc = "Copy one or more files into a destination directory." in
@@ -221,11 +218,12 @@ let copy_file_into_cmd =
              ~src:source_file ~dst ()))
       source_files
   in
-  ( Term.(
+  Cmd.v
+    (Cmd.info "copy-file-into" ~doc ~man)
+    Term.(
       const copy_file_into $ copts_t
       $ source_files_t ~verb:"to copy"
-      $ dest_dir_t $ chmod_mode_opt_t),
-    Term.info "copy-file-into" ~doc ~exits:Term.default_exits ~man )
+      $ dest_dir_t $ chmod_mode_opt_t)
 
 let copy_dir_cmd =
   let doc =
@@ -246,8 +244,9 @@ let copy_dir_cmd =
           (Diskuvbox.copy_dir ~err:box_err ~src:source_dir ~dst:dest_dir ()))
       source_dirs
   in
-  ( Term.(const copy_dir $ copts_t $ source_dirs_t ~verb:"to copy" $ dest_dir_t),
-    Term.info "copy-dir" ~doc ~exits:Term.default_exits ~man )
+  Cmd.v
+    (Cmd.info "copy-dir" ~doc ~man)
+    Term.(const copy_dir $ copts_t $ source_dirs_t ~verb:"to copy" $ dest_dir_t)
 
 let touch_file_cmd =
   let doc = "Touch one or more files." in
@@ -259,8 +258,9 @@ let touch_file_cmd =
       (fun file -> fail_if_error (Diskuvbox.touch_file ~err:box_err ~file ()))
       files
   in
-  ( Term.(const touch_file $ copts_t $ touch_files_t),
-    Term.info "touch-file" ~doc ~exits:Term.default_exits ~man )
+  Cmd.v
+    (Cmd.info "touch-file" ~doc ~man)
+    Term.(const touch_file $ copts_t $ touch_files_t)
 
 let find_up_cmd =
   let doc = "Find a file in the current directory or one of its ancestors." in
@@ -281,11 +281,12 @@ let find_up_cmd =
     | Some path -> print_endline (Fmt.str "%a" path_printer path)
     | None -> ()
   in
-  ( Term.(
+  Cmd.v
+    (Cmd.info "find-up" ~doc ~man)
+    Term.(
       const find_up $ copts_t
       $ dir_t ~verb:"to search" ~docv:"FROMDIR"
-      $ basenames_t $ path_printer_t),
-    Term.info "find-up" ~doc ~exits:Term.default_exits ~man )
+      $ basenames_t $ path_printer_t)
 
 let max_depth_opt = "max-depth"
 
@@ -410,11 +411,12 @@ let tree_cmd =
     fail_if_error
       (Diskuvbox.walk_down ~err:box_err ~max_depth ~from_path:dir ~f ())
   in
-  ( Term.(
+  Cmd.v
+    (Cmd.info "tree" ~doc ~man)
+    Term.(
       const tree $ copts_t
       $ dir_t ~verb:"to print" ~docv:"DIR"
-      $ max_depth_t $ path_printer_t $ encoding_t),
-    Term.info "tree" ~doc ~exits:Term.default_exits ~man )
+      $ max_depth_t $ path_printer_t $ encoding_t)
 
 let help_cmd =
   let doc = "display help about diskuvbox and diskuvbox commands" in
@@ -426,14 +428,10 @@ let help_cmd =
       `Blocks help_secs;
     ]
   in
-  ( Term.(ret (const help $ copts_t)),
-    Term.info "help" ~doc ~exits:Term.default_exits ~man )
+  Cmd.v (Cmd.info "help" ~doc ~man) Term.(ret (const help $ copts_t))
 
 let default_cmd =
-  let doc = "a box of utilities" in
-  ( Term.(ret (const (fun (_ : Log_config.t) -> `Help (`Pager, None)) $ copts_t)),
-    Term.info "diskuvbox" ~version:"%%VERSION%%" ~doc
-      ~sdocs:Manpage.s_common_options )
+  Term.(ret (const (fun (_ : Log_config.t) -> `Help (`Pager, None)) $ copts_t))
 
 let cmds =
   [
@@ -446,4 +444,10 @@ let cmds =
     help_cmd;
   ]
 
-let () = Term.(exit @@ eval_choice default_cmd cmds)
+let () =
+  let doc = "a box of utilities" in
+  let info =
+    Cmd.info "diskuvbox" ~version:"%%VERSION%%" ~doc
+      ~sdocs:Manpage.s_common_options
+  in
+  exit (Cmd.eval (Cmd.group ~default:default_cmd info cmds))

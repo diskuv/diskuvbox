@@ -17,9 +17,7 @@
 open Bos
 
 type box_error = string -> string
-
 type walk_path = Root | File of Fpath.t | Directory of Fpath.t
-
 type path_attribute = First_in_directory | Last_in_directory [@@deriving ord]
 
 module Path_attributes = Set.Make (struct

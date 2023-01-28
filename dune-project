@@ -1,7 +1,7 @@
 (lang dune 2.9)
 
 (name diskuvbox)
-(version 0.1.2)
+(version 0.2.0)
 (cram enable)
 (using mdx 0.1)
 
@@ -29,7 +29,7 @@
   (fmt      (>= 0.8.9))
   (logs     (>= 0.7.0))
   (mdx      (and (>= 2.0.0) :with-test))
-  (cmdliner (>= 1.0.0))
+  (cmdliner (>= 1.1.0))
   ))
 
 (package

@@ -20,9 +20,6 @@ let print_result =
 ;;
 
 print_endline "\n\n========= 20 MB ========\n\n";;
-
 print_result @@ OS.File.must_exist (Fpath.v "_build/test_20m");;
-
 print_endline "\n\n========= 5 GB ========\n\n";;
-
 print_result @@ OS.File.must_exist (Fpath.v "_build/test_5gb")

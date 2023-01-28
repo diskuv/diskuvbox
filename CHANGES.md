@@ -1,3 +1,9 @@
+# Changes
+
+## Pending
+
+- Switch to cmdliner.1.1.1
+
 ## 0.1.2
 
 - Reduce the number of opam dependencies by splitting diskuvbox.opam from
