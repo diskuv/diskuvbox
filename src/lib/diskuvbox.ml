@@ -121,6 +121,13 @@ let friendly_copyfile ?mode ?(bufsize = 1_048_576) ~err ~src ~dst () =
   let* nested_result =
     friendly_write_op
       (fun () ->
+        let* () =
+          (* For Windows, can't write without turning off read-only flag *)
+          if Sys.win32 then
+            let* exists = OS.File.exists dst in
+            if exists then OS.Path.Mode.set dst 0o644 else Ok ()
+          else Ok ()
+        in
         OS.File.with_output ?mode dst
           (fun output () -> write_file_contents ~output)
           ())

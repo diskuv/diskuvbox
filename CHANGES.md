@@ -1,8 +1,10 @@
 # Changes
 
-## Pending
+## 0.2.0
 
 - Switch to cmdliner.1.1.1
+- Fix bug where `copy_file` would fail on Windows if the file exists and was
+  readonly
 
 ## 0.1.2
 
