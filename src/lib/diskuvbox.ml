@@ -122,10 +122,17 @@ let friendly_copyfile ?mode ?(bufsize = 1_048_576) ~err ~src ~dst () =
     friendly_write_op
       (fun () ->
         let* () =
-          (* For Windows, can't write without turning off read-only flag *)
+          (* For Windows, can't write without turning off read-only flag.
+             In fact, you can still get Permission Denied even after turning
+             off read-only flag, perhaps because Windows has a richer
+             permissions model than POSIX. So we remove the file
+             after turning off read-only *)
           if Sys.win32 then
             let* exists = OS.File.exists dst in
-            if exists then OS.Path.Mode.set dst 0o644 else Ok ()
+            if exists then
+              let* () = OS.Path.Mode.set dst 0o644 in
+              OS.File.delete dst
+            else Ok ()
           else Ok ()
         in
         OS.File.with_output ?mode dst
