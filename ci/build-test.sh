@@ -159,22 +159,7 @@ if [ -n "$dunecontext" ]; then
     opamrun pin uutf --switch dkml -k version 1.0.3+dune  --no-action --yes
     #   * no --with-test since likely can't run cross-compiled
     #     architecture without an emulator
-    opamrun install \
-        "./${OPAM_PKGNAME}.opam" \
-        astring.0.8.5+dune \
-        base-bytes.base \
-        bos.0.2.1+dune \
-        cmdliner.1.1.1+dune \
-        fmt.0.9.0+dune \
-        fpath.0.7.3+dune \
-        logs.0.7.0+dune2 \
-        ptime.1.0.0+dune2 \
-        rresult.0.7.0+dune \
-        seq.base+dune \
-        uucp.14.0.0+dune \
-        uuseg.14.0.0+dune \
-        uutf.1.0.3+dune \
-        --switch dkml --deps-only --yes
+    opamrun install "./${OPAM_PKGNAME}.opam" --switch dkml --deps-only --yes
     
     # Test on host ABI
     opamrun exec --switch dkml -- dune build -p diskuvbox @runtest
