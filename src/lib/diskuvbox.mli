@@ -105,12 +105,14 @@ val copy_file :
   ?err:box_error ->
   ?bufsize:int ->
   ?mode:int ->
+  ?basename_rewriter:(string -> string) ->
   src:Fpath.t ->
   dst:Fpath.t ->
   unit ->
   (unit, string) result
 (** [copy_file ?err ?bufsize ?mode ~src ~dst ()] copies the file [src] to the
-    file [dst], creating [dst]'s parent directories as necessary.
+    file [dst], possibly rewriting the destination filenames with [basename_rewriter],
+    creating [dst]'s parent directories as necessary.
     
     Copying the file is done through a memory buffer of size [bufsize]. The
     default buffer size is large and may vary version to version. We recommend
@@ -119,22 +121,36 @@ val copy_file :
     If [mode] is specified, the chmod [mode] will be applied to [dst]. Otherwise
     the chmod mode is copied from [src].
     
+    The [basename_rewriter] operates on the basename of the source file. For example,
+    if a source file was ["dir1/file1"] and [let base_rewriter s = "rewritten-" ^ s]
+    then the destination file will be named ["rewritten-file1"] in the destination
+    directory tree. Embedded subdirectories like [let base_rewriter s = "new/" ^ s]
+    are accepted as well.
+
     Any error is passed to [err] if it is specified. The default [err] is
     the identity function {!Fun.id}. *)
 
 val copy_dir :
   ?err:box_error ->
   ?bufsize:int ->
+  ?basename_rewriter:(string -> string) ->
   src:Fpath.t ->
   dst:Fpath.t ->
   unit ->
   (unit, string) result
 (** [copy_dir ?err ?bufsize ~src ~dst ()] copies the contents of [src] into [dst],
-    creating [dst] and any parent directories as necessary.
+    possibly rewriting the filenames with [basename_rewriter], creating
+    [dst] and any parent directories as necessary.
       
     Copying the files is done through a memory buffer of size [bufsize]. The
     default buffer size is large and may vary version to version. We recommend
     setting the buffer size explicitly.
+
+    The [basename_rewriter] operates on the basename of the source file. For example,
+    if a source file was ["dir1/file1"] and [let base_rewriter s = "rewritten-" ^ s]
+    then the destination file will be named ["rewritten-file1"] in the destination
+    directory tree. Embedded subdirectories like [let base_rewriter s = "new/" ^ s]
+    are accepted as well.
 
     Any error is passed to [err] if it is specified. The default [err] is
     the identity function {!Fun.id}. *)

@@ -179,6 +179,36 @@ let chmod_mode_opt_t =
   in
   Term.(const from_octal $ modestring_opt_t)
 
+let affix_t ~affix ~verb =
+  let doc =
+    Printf.sprintf "A %s that will be %s to each destination file." affix verb
+  in
+  let t = Arg.(value & opt string "" & info [ affix ] ~doc) in
+  let valid_basename_or_empty = function
+    | "" -> ""
+    | s ->
+        (* Validate that the affix is a valid file pathname *)
+        let fp =
+          fail_if_error
+            (Fpath.of_string s |> Result.map_error (function `Msg m -> m))
+        in
+        let base_fp = Fpath.basename fp in
+        fail_if_error
+          (if String.equal s base_fp then Ok base_fp
+          else
+            Error
+              (Printf.sprintf
+                 "The %s '%s' is not a valid portion of a filename. You cannot \
+                  use directories, drive letters or anything else that does \
+                  not belong as the basename of a filepath"
+                 affix s))
+  in
+  Term.(const valid_basename_or_empty $ t)
+
+let prefix_t = affix_t ~affix:"prefix" ~verb:"prepended"
+let suffix_t = affix_t ~affix:"suffix" ~verb:"appended"
+let affix_rewriter ~prefix ~suffix s = prefix ^ s ^ suffix
+
 let copy_file_cmd =
   let doc = "Copy a source file to a destination file." in
   let man =
@@ -188,16 +218,18 @@ let copy_file_cmd =
         "Copy the SRCFILE to the DESTFILE. $(b,copy-file) will follow symlinks.";
     ]
   in
-  let copy_file (_ : Log_config.t) src dst chmod_mode_opt =
+  let copy_file (_ : Log_config.t) src dst chmod_mode_opt prefix suffix =
+    let basename_rewriter = affix_rewriter ~prefix ~suffix in
     fail_if_error
-      (Diskuvbox.copy_file ~err:box_err ?mode:chmod_mode_opt ~src ~dst ())
+      (Diskuvbox.copy_file ~err:box_err ?mode:chmod_mode_opt ~basename_rewriter
+         ~src ~dst ())
   in
   Cmd.v
     (Cmd.info "copy-file" ~doc ~man)
     Term.(
       const copy_file $ copts_t
       $ source_file_t ~verb:"to copy"
-      $ dest_file_t $ chmod_mode_opt_t)
+      $ dest_file_t $ chmod_mode_opt_t $ prefix_t $ suffix_t)
 
 let copy_file_into_cmd =
   let doc = "Copy one or more files into a destination directory." in
@@ -209,13 +241,15 @@ let copy_file_into_cmd =
          $(b,copy-files-into) will follow symlinks.";
     ]
   in
-  let copy_file_into (_ : Log_config.t) source_files dest_dir chmod_mode_opt =
+  let copy_file_into (_ : Log_config.t) source_files dest_dir chmod_mode_opt
+      prefix suffix =
+    let basename_rewriter = affix_rewriter ~prefix ~suffix in
     List.iter
       (fun source_file ->
         let dst = Fpath.(dest_dir / basename source_file) in
         fail_if_error
           (Diskuvbox.copy_file ~err:box_err ?mode:chmod_mode_opt
-             ~src:source_file ~dst ()))
+             ~basename_rewriter ~src:source_file ~dst ()))
       source_files
   in
   Cmd.v
@@ -223,7 +257,7 @@ let copy_file_into_cmd =
     Term.(
       const copy_file_into $ copts_t
       $ source_files_t ~verb:"to copy"
-      $ dest_dir_t $ chmod_mode_opt_t)
+      $ dest_dir_t $ chmod_mode_opt_t $ prefix_t $ suffix_t)
 
 let copy_dir_cmd =
   let doc =
@@ -237,16 +271,21 @@ let copy_dir_cmd =
          directory. $(b,copy-dir) will follow symlinks.";
     ]
   in
-  let copy_dir (_ : Log_config.t) source_dirs dest_dir =
+  let copy_dir (_ : Log_config.t) source_dirs dest_dir prefix suffix =
+    let basename_rewriter = affix_rewriter ~prefix ~suffix in
     List.iter
       (fun source_dir ->
         fail_if_error
-          (Diskuvbox.copy_dir ~err:box_err ~src:source_dir ~dst:dest_dir ()))
+          (Diskuvbox.copy_dir ~err:box_err ~basename_rewriter ~src:source_dir
+             ~dst:dest_dir ()))
       source_dirs
   in
   Cmd.v
     (Cmd.info "copy-dir" ~doc ~man)
-    Term.(const copy_dir $ copts_t $ source_dirs_t ~verb:"to copy" $ dest_dir_t)
+    Term.(
+      const copy_dir $ copts_t
+      $ source_dirs_t ~verb:"to copy"
+      $ dest_dir_t $ prefix_t $ suffix_t)
 
 let touch_file_cmd =
   let doc = "Touch one or more files." in

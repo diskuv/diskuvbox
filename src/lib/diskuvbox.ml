@@ -280,7 +280,17 @@ let touch_file ?(err = Fun.id) ~file () =
      else (* Write empty file *)
        friendly_write_small_string ~mode:0o644 file "")
 
-let copy_file ?(err = Fun.id) ?bufsize ?mode ~src ~dst () =
+let rewrite_dst ?basename_rewriter ~dst () =
+  let ( let* ) = Result.bind in
+  let dst_dir, dst_basename = Fpath.(split_base (normalize dst)) in
+  let* dst_basename' =
+    match basename_rewriter with
+    | Some rw -> rw (Fpath.to_string dst_basename) |> Fpath.of_string
+    | None -> Ok dst_basename
+  in
+  Ok Fpath.(dst_dir // dst_basename')
+
+let copy_file ?(err = Fun.id) ?bufsize ?mode ?basename_rewriter ~src ~dst () =
   let open Monad_syntax_rresult (struct
     let box_error = err
   end) in
@@ -289,6 +299,7 @@ let copy_file ?(err = Fun.id) ?bufsize ?mode ~src ~dst () =
      let* mode =
        match mode with Some m -> Ok m | None -> OS.Path.Mode.get src
      in
+     let* dst = rewrite_dst ?basename_rewriter ~dst () in
      let parent_dst = Fpath.parent dst in
      let* created = OS.Dir.create parent_dst in
      if created then
@@ -296,7 +307,7 @@ let copy_file ?(err = Fun.id) ?bufsize ?mode ~src ~dst () =
            l "[copy_file] Created directory %a" Fpath.pp parent_dst);
      friendly_copyfile ?bufsize ~mode ~err ~src ~dst ())
 
-let copy_dir ?(err = Fun.id) ?bufsize ~src ~dst () =
+let copy_dir ?(err = Fun.id) ?bufsize ?basename_rewriter ~src ~dst () =
   let open Monad_syntax_rresult (struct
     let box_error = err
   end) in
@@ -329,6 +340,7 @@ let copy_dir ?(err = Fun.id) ?bufsize ~src ~dst () =
           in
           let src = Fpath.(normalize (src // rel))
           and dst = Fpath.(normalize (dst // rel)) in
+          let* dst = rewrite_dst ?basename_rewriter ~dst () in
           let* isdir = OS.Dir.exists src in
           match isdir with
           | true ->

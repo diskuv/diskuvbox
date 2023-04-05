@@ -257,7 +257,7 @@ NAME
        a destination directory.
 
 SYNOPSIS
-       diskuvbox copy-dir [OPTION]... SRCDIR... DESTDIR
+       diskuvbox copy-dir [OPTION]… SRCDIR… DESTDIR
 
 DESCRIPTION
        Copy content of one or more SRCDIR... directories to the DESTDIR
@@ -274,24 +274,30 @@ ARGUMENTS
 
 OPTIONS
        --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of `auto', `always' or
-           `never'.
+           Colorize the output. WHEN must be one of auto, always or never.
 
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of `auto',
-           `pager', `groff' or `plain'. With `auto', the format is `pager` or
-           `plain' whenever the TERM env var is `dumb' or undefined.
+       --prefix=VAL
+           A prefix that will be prepended to each destination file.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
+
+       --suffix=VAL
+           A suffix that will be appended to each destination file.
 
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring
            more.
 
        --verbosity=LEVEL (absent=warning)
-           Be more or less verbose. LEVEL must be one of `quiet', `error',
-           `warning', `info' or `debug'. Takes over -v.
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -301,9 +307,14 @@ EXIT STATUS
 
        0   on success.
 
+       123 on indiscriminate errors reported on standard error.
+
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+SEE ALSO
+       diskuvbox(1)
 
 ```
 
@@ -315,7 +326,7 @@ NAME
        diskuvbox-copy-file - Copy a source file to a destination file.
 
 SYNOPSIS
-       diskuvbox copy-file [OPTION]... SRCFILE DESTFILE
+       diskuvbox copy-file [OPTION]… SRCFILE DESTFILE
 
 DESCRIPTION
        Copy the SRCFILE to the DESTFILE. copy-file will follow symlinks.
@@ -330,29 +341,35 @@ ARGUMENTS
 
 OPTIONS
        --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of `auto', `always' or
-           `never'.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of `auto',
-           `pager', `groff' or `plain'. With `auto', the format is `pager` or
-           `plain' whenever the TERM env var is `dumb' or undefined.
+           Colorize the output. WHEN must be one of auto, always or never.
 
        -m VAL, --mode=VAL
            The chmod mode permission of the destination file, in octal. If
            not specified then the chmod mode permission of the source file is
            used. Examples: 644, 755.
 
+       --prefix=VAL
+           A prefix that will be prepended to each destination file.
+
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
+
+       --suffix=VAL
+           A suffix that will be appended to each destination file.
 
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring
            more.
 
        --verbosity=LEVEL (absent=warning)
-           Be more or less verbose. LEVEL must be one of `quiet', `error',
-           `warning', `info' or `debug'. Takes over -v.
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -362,9 +379,14 @@ EXIT STATUS
 
        0   on success.
 
+       123 on indiscriminate errors reported on standard error.
+
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+SEE ALSO
+       diskuvbox(1)
 
 ```
 
@@ -377,7 +399,7 @@ NAME
        directory.
 
 SYNOPSIS
-       diskuvbox copy-file-into [OPTION]... SRCFILE... DESTDIR
+       diskuvbox copy-file-into [OPTION]… SRCFILE… DESTDIR
 
 DESCRIPTION
        Copy one or more SRCFILE... files to the DESTDIR directory.
@@ -394,29 +416,35 @@ ARGUMENTS
 
 OPTIONS
        --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of `auto', `always' or
-           `never'.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of `auto',
-           `pager', `groff' or `plain'. With `auto', the format is `pager` or
-           `plain' whenever the TERM env var is `dumb' or undefined.
+           Colorize the output. WHEN must be one of auto, always or never.
 
        -m VAL, --mode=VAL
            The chmod mode permission of the destination file, in octal. If
            not specified then the chmod mode permission of the source file is
            used. Examples: 644, 755.
 
+       --prefix=VAL
+           A prefix that will be prepended to each destination file.
+
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
+
+       --suffix=VAL
+           A suffix that will be appended to each destination file.
 
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring
            more.
 
        --verbosity=LEVEL (absent=warning)
-           Be more or less verbose. LEVEL must be one of `quiet', `error',
-           `warning', `info' or `debug'. Takes over -v.
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -426,9 +454,14 @@ EXIT STATUS
 
        0   on success.
 
+       123 on indiscriminate errors reported on standard error.
+
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+SEE ALSO
+       diskuvbox(1)
 
 ```
 
@@ -441,7 +474,7 @@ NAME
        ancestors.
 
 SYNOPSIS
-       diskuvbox find-up [OPTION]... FROMDIR BASENAME...
+       diskuvbox find-up [OPTION]… FROMDIR BASENAME…
 
 DESCRIPTION
        Find a file that matches the name as one or more specified FILE...
@@ -460,13 +493,7 @@ ARGUMENTS
 
 OPTIONS
        --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of `auto', `always' or
-           `never'.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of `auto',
-           `pager', `groff' or `plain'. With `auto', the format is `pager` or
-           `plain' whenever the TERM env var is `dumb' or undefined.
+           Colorize the output. WHEN must be one of auto, always or never.
 
        --native
            Print files and directories in native format. On Windows the
@@ -483,8 +510,14 @@ OPTIONS
            more.
 
        --verbosity=LEVEL (absent=warning)
-           Be more or less verbose. LEVEL must be one of `quiet', `error',
-           `warning', `info' or `debug'. Takes over -v.
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -494,9 +527,14 @@ EXIT STATUS
 
        0   on success.
 
+       123 on indiscriminate errors reported on standard error.
+
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+SEE ALSO
+       diskuvbox(1)
 
 ```
 
@@ -508,7 +546,7 @@ NAME
        diskuvbox-touch-file - Touch one or more files.
 
 SYNOPSIS
-       diskuvbox touch-file [OPTION]... FILE...
+       diskuvbox touch-file [OPTION]… FILE…
 
 DESCRIPTION
        Touch one or more FILE... files.
@@ -520,13 +558,7 @@ ARGUMENTS
 
 OPTIONS
        --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of `auto', `always' or
-           `never'.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of `auto',
-           `pager', `groff' or `plain'. With `auto', the format is `pager` or
-           `plain' whenever the TERM env var is `dumb' or undefined.
+           Colorize the output. WHEN must be one of auto, always or never.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -536,8 +568,14 @@ OPTIONS
            more.
 
        --verbosity=LEVEL (absent=warning)
-           Be more or less verbose. LEVEL must be one of `quiet', `error',
-           `warning', `info' or `debug'. Takes over -v.
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -547,9 +585,14 @@ EXIT STATUS
 
        0   on success.
 
+       123 on indiscriminate errors reported on standard error.
+
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+SEE ALSO
+       diskuvbox(1)
 
 ```
 
@@ -561,10 +604,12 @@ NAME
        diskuvbox-tree - Print a directory tree.
 
 SYNOPSIS
-       diskuvbox tree [OPTION]... DIR
+       diskuvbox tree [OPTION]… DIR
 
 DESCRIPTION
-       Print the directory tree starting at the DIR directory.
+       Print the directory tree starting at the DIR directory. By default
+       only the DIR directory (the first level) is printed. Use --max-depth
+       to print deeper
 
 ARGUMENTS
        DIR (required)
@@ -572,8 +617,7 @@ ARGUMENTS
 
 OPTIONS
        --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of `auto', `always' or
-           `never'.
+           Colorize the output. WHEN must be one of auto, always or never.
 
        -d VAL, --max-depth=VAL (absent=0)
            Maximum depth to print. A maximum depth of 0 will never print
@@ -584,11 +628,6 @@ OPTIONS
        -e VAL, --encoding=VAL (absent=ASCII)
            The encoding of the graphic characters printed: ASCII, UTF-8.
            Defaults to ASCII
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of `auto',
-           `pager', `groff' or `plain'. With `auto', the format is `pager` or
-           `plain' whenever the TERM env var is `dumb' or undefined.
 
        --native
            Print files and directories in native format. On Windows the
@@ -605,8 +644,14 @@ OPTIONS
            more.
 
        --verbosity=LEVEL (absent=warning)
-           Be more or less verbose. LEVEL must be one of `quiet', `error',
-           `warning', `info' or `debug'. Takes over -v.
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -616,9 +661,14 @@ EXIT STATUS
 
        0   on success.
 
+       123 on indiscriminate errors reported on standard error.
+
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
+
+SEE ALSO
+       diskuvbox(1)
 
 ```
 

@@ -5,6 +5,8 @@
 - Switch to cmdliner.1.1.1
 - Fix bug where `copy_file` would fail on Windows if the file exists and was
   readonly
+- Add `--prefix` and `--suffix` options for `diskuvbox copy-file-into`,
+  `diskuvbox copy-file` and `diskuvbox copy-dir`
 
 ## 0.1.2
 
