@@ -6,7 +6,7 @@ shift
 sed 's/```console/```sh/g; s#[$] diskuvbox#$ ./diskuvbox.exe#g' "$IN" > "$IN.sh"
 
 #   produce "$IN.sh".corrected
-ocaml-mdx test --force-output "$IN.sh"
+TERM=dumb ocaml-mdx test --force-output "$IN.sh"
 
 #   shellcheck disable=SC2016
 sed 's/```sh/```console/g; s#[$] ./diskuvbox.exe#$ diskuvbox#g' "$IN.sh.corrected" > "$IN.corrected"
