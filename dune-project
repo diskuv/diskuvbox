@@ -28,6 +28,7 @@
   (bos      (>= 0.2.0))
   (fmt      (>= 0.8.9))
   (logs     (>= 0.7.0))
+  (result   (>= 1.5))
   (mdx      (and (>= 2.0.0) :with-test))
   (cmdliner (>= 1.1.0))
   ))

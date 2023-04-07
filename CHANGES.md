@@ -2,7 +2,7 @@
 
 ## 0.2.0
 
-- Switch to cmdliner.1.1.1
+- Switch to `cmdliner >= 1.1.0`. Require `result >= 1.5`
 - Fix bug where `copy_file` would fail on Windows if the file exists and was
   readonly
 - Add `--prefix` and `--suffix` options for `diskuvbox copy-file-into`,
